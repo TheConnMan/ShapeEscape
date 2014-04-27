@@ -2,18 +2,21 @@
  * OPTIONS
  * Required
  * title - Title of the level
- * momentum - Total momentum of each circle, can be function
- * ballNum - Number of circles
- * expandSpeed - Expansion speed of the user's circle, can be function
+ * speed - Speed of the user
+ * r - Radius of the user, can be a function
  * 
- * One of the following sets
- * avgSize, sizeVar - Average radius of a circle, variance of the circle radius
- * r - Radius of each node, can be a function
+ * Personalities
+ * name - Name
+ * bio - Short biography
+ * r - Radius, can be function
+ * momentum - Momentum, can be function
+ * color - Shape color
+ * physics - Physics object for how shape behaves
  * 
- * Optional
- * angle - Starting angle of each node, can be a function
- * randAngleInt - Interval in milliseconds when each circle gets a new, random angle
- * contributor - Contributor of the level
+ * Physics
+ * a - Function to determine trajectory angle
+ * dx - Function to determine change in x on tick
+ * dy - Function to determine change in y on tick
  */
 var physics = {
 	follow: {
@@ -39,24 +42,32 @@ physics.gaurd = {
 }
 var personalities = {
 	basic: {
+		name: 'Basic',
+		bio: 'Basic is your average Joe. He enjoys lounging around, weekends, and chasing you. He likes a relaxing chase, but likes to clear his mind while doing so. He\'ll go to where you are, but can easily be decieved if you run circles around him.',
 		r: 20,
 		momentum: 150,
 		color: 'gray',
 		physics: physics.follow
 	},
 	basicGhost: {
+		name: 'Ghost',
+		bio: 'Test bio',
 		r: 20,
 		momentum: 150,
-		color: 'lightgray',
+		color: '#DDD',
 		physics: physics.followGhost
 	},
 	seeker: {
+		name: 'Seeker',
+		bio: 'Test bio',
 		r: 20,
 		momentum: 300,
 		color: 'blue',
 		physics: physics.trajectory
 	},
 	gaurd: {
+		name: 'Gaurd Dog',
+		bio: 'Test bio',
 		r: 20,
 		momentum: 400,
 		color: 'green',
@@ -83,6 +94,8 @@ $(document).ready(function() {
 	if (!sto || typeof(JSON.parse(sto)) != 'object' || !JSON.parse(sto)[1]) {
 		window.localStorage[scoreStorage] = JSON.stringify({1: 0})
 		init(1)
+		$('#modalContent').html($('#modalContent').html() + newPersonalityHtml(1) + '<button class="close">Lemme At \'Em!</button>');
+		newPersonalityJs(1);
 		$('#levelEnd').reveal({
 		     animation: 'fadeAndPop',
 		     animationspeed: 300,
@@ -310,6 +323,7 @@ function levelEnd(t, level) {
 		var html;
 		html = '<h1>You Completed Level ' + level + '</h1>';
 		if (levels[parseInt(level) + 1] || custom[parseInt(level) + 1]) {
+			html += newPersonalityHtml(parseInt(level) + 1)
 			html += '<button class="close" onclick="init(' + (parseInt(level) + 1) + ')">Next Level</button>';
 		} else {
 			html += '<button class="close" onclick="init(' + level + ')">Retry Level</button>';
@@ -320,6 +334,9 @@ function levelEnd(t, level) {
 			html += '<button class="close" onclick="window.location.href=\'#custom\'">Build My Own</button>';
 		}
 		$('#modalContent').html(html);
+		if (levels[parseInt(level) + 1] || custom[parseInt(level) + 1]) {
+			newPersonalityJs(parseInt(level) + 1);
+		}
 		$('#levelEnd').reveal({
 		     animation: 'fadeAndPop',
 		     animationspeed: 300,
@@ -335,6 +352,44 @@ function levelEnd(t, level) {
 		window.localStorage[scoreStorage] = JSON.stringify(best)
 		$('#best').html(t)
 	}
+}
+
+function newPersonalityHtml(level) {
+	var all = allNewPersonalities(level);
+	if (all.length != 0) {
+		return '<h2>New ' + (all.length == 1 ? 'Personality' : 'Personalities') + ' Unlocked!</h2>' + $.map(all, function(d) { return newPersonality(d, personalities[d]); }).join('');
+	} else {
+		return '';
+	}
+}
+
+function allNewPersonalities(level) {
+	var all = Object.keys(levels[level].personalities);
+	for (var i = 1; i < level; i++) {
+		Object.keys(levels[i].personalities).forEach(function(d) {
+			if (all.indexOf(d) != -1) {
+				all.splice(all.indexOf(d), 1);
+			}
+		})
+	}
+	return all;
+}
+
+function newPersonalityJs(level) {
+	var all = allNewPersonalities(level);
+	if (all && all.length != 0) {
+		all.forEach(function(d) {
+			var p = personalities[d];
+			d3.select('#' + d).append('circle').attr('transform', 'translate(' + $('#' + d).width() / 2 + ',' + $('#' + d).height() / 2 + ')')
+				.attr('r', p.r).style('fill', p.color)
+		});
+	}
+}
+
+function newPersonality(d, obj) {
+	var html = '<table class="personality"><tr><td class="pic"><svg id="' + d + '" class="svg"></svg></td><td>';
+	html += '<h2>' + obj.name + '</h2><p><b>Bio:</b>' + obj.bio + '</p>' + '</td></tr></table>';
+	return html;
 }
 
 function initLevels(all, open, cur) {
