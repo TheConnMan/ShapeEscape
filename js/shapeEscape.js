@@ -21,17 +21,16 @@
 var physics = {
 	follow: {
 		a: function(d, c, w, h) { return Math.atan2(c.y - d.y, c.x - d.x); },
+		dx: function(d, c, w, h) { return d.x + ($.isFunction(d.m) ? d.m(d, c, w, h) : d.m) * Math.cos(d.a) / (d.r * d.r); },
+		dy: function(d, c, w, h) { return d.y + ($.isFunction(d.m) ? d.m(d, c, w, h) : d.m) * Math.sin(d.a) / (d.r * d.r); }
+	}, followGhost: {
+		a: function(d, c, w, h) { return Math.atan2(Math.abs(c.y - d.y) > Math.abs(h + c.y - d.y) ? h + c.y - d.y : c.y - d.y, Math.abs(c.x - d.x) > Math.abs(w + c.x - d.x) ? w + c.x - d.x : c.x - d.x) },
 		dx: function(d, c, w, h) { return (d.x + ($.isFunction(d.m) ? d.m(d, c, w, h) : d.m) * Math.cos(d.a) / (d.r * d.r) + w) % w; },
 		dy: function(d, c, w, h) { return (d.y + ($.isFunction(d.m) ? d.m(d, c, w, h) : d.m) * Math.sin(d.a) / (d.r * d.r) + h) % h; }
 	}
 }
-physics.followGhost = {
-	a: function(d, c, w, h) { return Math.atan2(Math.abs(c.y - d.y) > Math.abs(h + c.y - d.y) ? h + c.y - d.y : c.y - d.y, Math.abs(c.x - d.x) > Math.abs(w + c.x - d.x) ? w + c.x - d.x : c.x - d.x) },
-	dx: physics.follow.dx,
-	dy: physics.follow.dy
-}
 physics.trajectory = {
-	a: function(d, c, w, h) { return Math.atan2(c.y + 	200 * movement.y - d.y, c.x + 100 * movement.x - d.x) },
+	a: function(d, c, w, h) { return Math.atan2(c.y + 200 * movement.y - d.y, c.x + 100 * movement.x - d.x) },
 	dx: physics.follow.dx,
 	dy: physics.follow.dy
 }
@@ -43,7 +42,7 @@ physics.gaurd = {
 var personalities = {
 	basic: {
 		name: 'Basic',
-		bio: 'Basic is your average Joe. He enjoys lounging around, weekends, and chasing you. He likes a relaxing chase, but likes to clear his mind while doing so. He\'ll go to where you are, but can easily be decieved if you run circles around him.',
+		bio: "Basic is your average Joe. He enjoys lounging around, weekends, and chasing you. He likes a relaxing chase, but likes to clear his mind while doing so. He'll go to where you are, but can easily be decieved if you run circles around him.",
 		r: 20,
 		momentum: 150,
 		color: 'gray',
@@ -51,25 +50,25 @@ var personalities = {
 	},
 	basicGhost: {
 		name: 'Ghost',
-		bio: 'Test bio',
+		bio: "Ghost is a run-of-the mill ghost. She puts in about as much effor as Basic, but doesn't care for pesky walls. She'll chase you and it it's faster to go through the wall to get you she will.",
 		r: 20,
 		momentum: 150,
-		color: '#DDD',
+		color: '#EEE',
 		physics: physics.followGhost
 	},
 	seeker: {
 		name: 'Seeker',
-		bio: 'Test bio',
+		bio: "Seeker's gotten some intel about where you're going and moves to intercept you. Watch out: this guy's sneaky.",
 		r: 20,
-		momentum: 300,
+		momentum: 250,
 		color: 'blue',
 		physics: physics.trajectory
 	},
 	gaurd: {
 		name: 'Gaurd Dog',
-		bio: 'Test bio',
+		bio: "Gaurd Dog won't bother you if you're far away, but if you get too close to him he'll chase after you. He's very protective of his space.",
 		r: 20,
-		momentum: 400,
+		momentum: 350,
 		color: 'green',
 		physics: physics.gaurd
 	}
@@ -79,7 +78,7 @@ var personalities = {
 };
 var levels = {1: {title: 'Meet Basic', speed: 1, r: 20, personalities: {basic: 10}},
 		2: {title: 'Ghost', speed: 1, r: 20, personalities: {basicGhost: 5, basic: 5}},
-		3: {title: 'Seekers', speed: 1, r: 20, personalities: {seeker: 5}},
+		3: {title: 'Seekers', speed: 1, r: 20, personalities: {seeker: 3}},
 		4: {title: 'Gaurd', speed: 1, r: 20, personalities: {gaurd: 5, basic: 5}}};
 var custom = {}, current, userColor = 'lightblue', defaultInterval, scoreStorage = 'bestShapeEscape',
 		customStorage = 'customShapeEscape', movement = {x: 0, y: 0}, down = [], playing = false, buffer = 200;
@@ -151,7 +150,7 @@ function init(level) {
 		})
 	}
 
-	$('#title').html('Level ' + level + ' - ' + params.title)
+	$('#title').html('Level ' + level + ' - ' + params.title);
 	$('#current').html('0');
 	if (params.contributor) {
 		$('#contributor').html('Contributed by ' + params.contributor);
@@ -169,6 +168,7 @@ function init(level) {
 		best[level] = 0
 		window.localStorage[scoreStorage] = JSON.stringify(best)
 	}
+	layoutPersonalities();
 	initLevels(Object.keys(levels).concat(Object.keys(custom)), Object.keys(JSON.parse(window.localStorage[scoreStorage])), level)
 	$('#best').html(best[level])
 	
@@ -281,10 +281,10 @@ function init(level) {
 		user.each(function(d) {
 			var r = $.isFunction(d.r) ? d.r(d) : d.r;
 			if (d.x + movement.x * params.speed <= gameW - r && d.x + movement.x * params.speed >= r) {
-				d.x += movement.x * params.speed;
+				d.x += movement.x ? movement.x * params.speed / dist(movement.x, movement.y) : 0;
 			}
 			if (d.y + movement.y * params.speed <= gameH - r && d.y + movement.y * params.speed >= r) {
-				d.y += movement.y * params.speed;
+				d.y += movement.y ? movement.y * params.speed / dist(movement.x, movement.y) : 0;;
 			}
 		});
 		user.attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; });
@@ -380,16 +380,64 @@ function newPersonalityJs(level) {
 	if (all && all.length != 0) {
 		all.forEach(function(d) {
 			var p = personalities[d];
-			d3.select('#' + d).append('circle').attr('transform', 'translate(' + $('#' + d).width() / 2 + ',' + $('#' + d).height() / 2 + ')')
-				.attr('r', p.r).style('fill', p.color)
+			drawPersonality(d, p)
 		});
 	}
 }
 
+function drawPersonality(d, obj) {
+	d3.select('#' + d).append('circle').attr('transform', 'translate(' + $('#' + d).width() / 2 + ',' + $('#' + d).height() / 2 + ')')
+		.attr('r', obj.r).style('fill', obj.color)
+}
+
 function newPersonality(d, obj) {
 	var html = '<table class="personality"><tr><td class="pic"><svg id="' + d + '" class="svg"></svg></td><td>';
-	html += '<h2>' + obj.name + '</h2><p><b>Bio:</b>' + obj.bio + '</p>' + '</td></tr></table>';
+	html += '<h2>' + obj.name + '</h2><p>' + obj.bio + '</p>' + '</td></tr></table>';
 	return html;
+}
+
+function layoutPersonalities() {
+	var w = 400, perRow = 10, pad = 2, dw = w / perRow - 2 * pad, dh = dw, h = (dh + 2 * pad) * Math.floor((Object.keys(personalities).length - 1) / perRow + 1);
+	var keys = Object.keys(JSON.parse(window.localStorage[scoreStorage]));
+	var level = keys[keys.length - 1];
+	var avail = [];
+	for (var i = 1; i <= level; i++) {
+		avail = $.merge(avail, Object.keys(levels[i].personalities));
+	}
+	avail = $.unique(avail);
+	d3.select('#personalities').select('svg').remove();
+	var svg = d3.select('#personalities').append('svg')
+				.attr('width', w).attr('height', h);
+	var icons = $.map(avail, function(d, i) {
+		return {
+			name: d,
+			x: (i * (dw + 2 * pad)) % w + pad + dw / 2,
+			y: Math.floor(i / perRow) * (dh + 2 * pad) + pad + dh / 2,
+			w: dw,
+			h: dh,
+			d: personalities[d],
+			r: dw / 2
+		}
+	});
+	var g = svg.selectAll(".icons")
+		.data(icons).enter()
+		.append("g")
+		.attr("width", function(d) { return d.w; })
+		.attr("height", function(d) { return d.h; })
+		.attr('class', 'icon');
+	g.append('circle').attr('r', function(d) { return d.r; })
+		.attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
+		.style('fill', function(d) { return d.d.color; })
+		.on('click', function(d) {
+			$('#modalContent').html(newPersonality(d.name, d.d) + '<a class="close-reveal-modal">&#215;</a>');
+			drawPersonality(d.name, d.d);
+			$('#levelEnd').reveal({
+			     animation: 'fadeAndPop',
+			     animationspeed: 300,
+			     closeonbackgroundclick: true,
+			     dismissmodalclass: 'close-reveal-modal'
+			});
+		});
 }
 
 function initLevels(all, open, cur) {
