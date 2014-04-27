@@ -33,45 +33,45 @@ physics.trajectory = {
 	dy: physics.follow.dy
 }
 physics.gaurd = {
-	a: physics.follow.a,
-	dx: function(d, c, w, h) { return dist(d.sx - c.x, d.sy - c.y) <= 100 ? physics.follow.dx(d, c, w, h) : d.sx },
-	dy: function(d, c, w, h) { return dist(d.sx - c.x, d.sy - c.y) <= 100 ? physics.follow.dy(d, c, w, h) : d.sy }
+	a: function(d, c, w, h) { return dist(d.sx - c.x, d.sy - c.y) <= 200 ? Math.atan2(c.y - d.y, c.x - d.x) : Math.atan2(d.sy - d.y, d.sx - d.x) },
+	dx: physics.follow.dx,
+	dy: physics.follow.dy
 }
 var personalities = {
 	basic: {
 		r: 20,
 		momentum: 150,
 		color: 'gray',
-		physics: physics.follow,
-		collide: true
+		physics: physics.follow
 	},
 	basicGhost: {
 		r: 20,
 		momentum: 150,
 		color: 'lightgray',
-		physics: physics.followGhost,
-		collide: false
+		physics: physics.followGhost
 	},
 	seeker: {
 		r: 20,
 		momentum: 300,
-		color: 'lightgray',
-		physics: physics.trajectory,
-		collide: false
+		color: 'blue',
+		physics: physics.trajectory
 	},
 	gaurd: {
 		r: 20,
-		momentum: 200,
-		color: 'lightgray',
-		physics: physics.gaurd,
-		collide: false
+		momentum: 400,
+		color: 'green',
+		physics: physics.gaurd
 	}
+}, defaultStart = {
+	x: function(w, h) { return w / 2; },
+	y: function(w, h) { return h / 2; }
 };
 var levels = {1: {title: 'Meet Basic', speed: 1, r: 20, personalities: {basic: 10}},
 		2: {title: 'Ghost', speed: 1, r: 20, personalities: {basicGhost: 5, basic: 5}},
 		3: {title: 'Seekers', speed: 1, r: 20, personalities: {seeker: 5}},
-		4: {title: 'Gaurd', speed: 1, r: 20, personalities: {gaurd: 5}}};
-var custom = {}, current, userColor = 'lightblue', defaultInterval, scoreStorage = 'bestShapeEscape', customStorage = 'customShapeEscape', movement = {x: 0, y: 0}, down = [], playing = false;;
+		4: {title: 'Gaurd', speed: 1, r: 20, personalities: {gaurd: 5, basic: 5}}};
+var custom = {}, current, userColor = 'lightblue', defaultInterval, scoreStorage = 'bestShapeEscape',
+		customStorage = 'customShapeEscape', movement = {x: 0, y: 0}, down = [], playing = false, buffer = 200;
 
 $(document).ready(function() {
 	$('#customButtons').hide();
@@ -130,7 +130,7 @@ function init(level) {
 			renumberCustom();
 			$('#customButtons').hide();
 			var a = getFinishedLevels();
-			if (a.length != Object.keys(levels)) {
+			if (a.length != Object.keys(levels).length) {
 				init(parseInt(a[a.length - 1]) + 1);
 			} else {
 				init(a[a.length - 1]);
@@ -144,6 +144,12 @@ function init(level) {
 		$('#contributor').html('Contributed by ' + params.contributor);
 	} else {
 		$('#contributor').html('');
+	}
+	var startXY;
+	if (params.start) {
+		startXY = params.start;
+	} else {
+		startXY = defaultStart;
 	}
 	var best = JSON.parse(window.localStorage[scoreStorage])
 	if (!best[level]) {
@@ -164,23 +170,22 @@ function init(level) {
 	var nodes = [];
 	Object.keys(params.personalities).forEach(function(k) {
 		d3.range(params.personalities[k]).forEach(function() {
-			console.log(k)
 			var obj = personalities[k];
 			var o = Math.random()
 			var r = $.isFunction(r) ? obj.r(o) : obj.r;
 			var rad = obj.r;
-			var me = {r: rad,
-				x: Math.random() * (gameW - 2 * r) + r,
-				y: Math.random() * (gameH - 2 * r) + r,
+			var xy = startingPosition([r, gameW - r], [r, gameH - r], [startXY.x(gameW, gameH), startXY.y(gameW, gameH)], buffer);
+			nodes.push({r: rad,
+				x: xy[0],
+				y: xy[1],
+				sx: xy[0],
+				sy: xy[1],
 				m: obj.momentum, o: o, color: obj.color,
-				physics: obj.physics};
-			me.sx = me.x;
-			me.sy = me.y;
-			nodes.push(me);
+				physics: obj.physics});
 		})
 	});
 	var userNode = d3.range(1).map(function() {
-		return {r: params.r, x: gameW / 2, y: gameH / 2, color: userColor};
+		return {r: params.r, x: startXY.x(gameW, gameH), y: startXY.y(gameW, gameH), color: userColor};
 	});
 	
 	var shapes = svg.selectAll('.shapes')
@@ -287,6 +292,14 @@ function dist(x, y) {
 	return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 }
 
+function startingPosition(x, y, s, b) {
+	var xy;
+	while (!xy || dist(xy[0] - s[0], xy[1] - s[1]) <= b) {
+		xy = [Math.random() * (x[1] - x[0]) + x[0], Math.random() * (y[1] - y[0]) + y[0]];
+	}
+	return xy;
+}
+
 function levelEnd(t, level) {
 	playing = false;
 	clearInterval(defaultInterval);
@@ -357,9 +370,6 @@ function initLevels(all, open, cur) {
 		if (d.open) {
 			if (defaultInterval) {
 				clearInterval(defaultInterval);
-			}
-			if (moveInterval) {
-				clearInterval(moveInterval);
 			}
 			init(d.level);
 		}
