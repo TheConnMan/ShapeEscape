@@ -2,7 +2,7 @@
  * OPTIONS
  * Required
  * title - Title of the level
- * speed - Speed of the user
+ * speed - Speed of the user, can be a function
  * r - Radius of the user, can be a function
  * 
  * Personalities
@@ -76,10 +76,13 @@ var personalities = {
 	x: function(w, h) { return w / 2; },
 	y: function(w, h) { return h / 2; }
 };
+
 var levels = {1: {title: 'Meet Basic', speed: 1, r: 20, personalities: {basic: 10}},
 		2: {title: 'Ghost', speed: 1, r: 20, personalities: {basicGhost: 5, basic: 5}},
-		3: {title: 'Seekers', speed: 1, r: 20, personalities: {seeker: 3}},
-		4: {title: 'Gaurd', speed: 1, r: 20, personalities: {gaurd: 5, basic: 5}}};
+		3: {title: 'Seeker', speed: 1, r: 20, personalities: {seeker: 1}},
+		4: {title: 'Gaurd', speed: 1, r: 20, personalities: {gaurd: 5, basic: 5}},
+		5: {title: 'Seeker Pack', speed: 1, r: 20, personalities: {seeker: 4}},
+		6: {title: 'Save Your Strength', speed: function(d) { return .2 + Math.max((1000 - d.dist) / 2000, 0); }, r: 20, personalities: {basic: 5}}};
 var custom = {}, current, userColor = 'lightblue', defaultInterval, scoreStorage = 'bestShapeEscape',
 		customStorage = 'customShapeEscape', movement = {x: 0, y: 0}, down = [], playing = false, buffer = 200;
 
@@ -117,7 +120,7 @@ $(document).ready(function() {
 	//$("#tada")[0].load();
 	//$("#tada")[0].volume = .1;
 	!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
-})
+});
 
 function init(level) {
 	playing = true;
@@ -198,7 +201,7 @@ function init(level) {
 		})
 	});
 	var userNode = d3.range(1).map(function() {
-		return {r: params.r, x: startXY.x(gameW, gameH), y: startXY.y(gameW, gameH), color: userColor};
+		return {r: params.r, x: startXY.x(gameW, gameH), y: startXY.y(gameW, gameH), color: userColor, dist: 0};
 	});
 	
 	var shapes = svg.selectAll('.shapes')
@@ -280,11 +283,16 @@ function init(level) {
 		shapes.attr("transform", function(d) { return 'translate(' + d.x + ', ' + d.y + ')'; });
 		user.each(function(d) {
 			var r = $.isFunction(d.r) ? d.r(d) : d.r;
-			if (d.x + movement.x * params.speed <= gameW - r && d.x + movement.x * params.speed >= r) {
-				d.x += movement.x ? movement.x * params.speed / dist(movement.x, movement.y) : 0;
+			var s = $.isFunction(params.speed) ? params.speed(d) : params.speed;
+			if (d.x + movement.x * s <= gameW - r && d.x + movement.x * s >= r) {
+				var move = movement.x ? movement.x * s / dist(movement.x, movement.y) : 0;
+				d.x += move;
+				d.dist += Math.abs(move);
 			}
-			if (d.y + movement.y * params.speed <= gameH - r && d.y + movement.y * params.speed >= r) {
-				d.y += movement.y ? movement.y * params.speed / dist(movement.x, movement.y) : 0;;
+			if (d.y + movement.y * s <= gameH - r && d.y + movement.y * s >= r) {
+				var move = movement.y ? movement.y * s / dist(movement.x, movement.y) : 0;
+				d.y += move;
+				d.dist += Math.abs(move);
 			}
 		});
 		user.attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; });
