@@ -21,24 +21,34 @@
 var physics = {
 	follow: {
 		a: function(d, c, w, h) { return Math.atan2(c.y - d.y, c.x - d.x); },
-		dx: function(d, c, w, h) { return d.x + ($.isFunction(d.m) ? d.m(d, c, w, h) : d.m) * Math.cos(d.a) / (d.r * d.r); },
-		dy: function(d, c, w, h) { return d.y + ($.isFunction(d.m) ? d.m(d, c, w, h) : d.m) * Math.sin(d.a) / (d.r * d.r); }
+		dx: function(d, c, w, h) { var x = d.x + get(d.m, d, c, w, h) * Math.cos(d.a) / (d.r * d.r); return (x + d.r <= w && x >= d.r) ? x : d.x; },
+		dy: function(d, c, w, h) { var y = d.y + get(d.m, d, c, w, h) * Math.sin(d.a) / (d.r * d.r); return (y + d.r <= h && y >= d.r) ? y : d.y; }
 	}, followGhost: {
 		a: function(d, c, w, h) { return Math.atan2(Math.abs(c.y - d.y) > Math.abs(h + c.y - d.y) ? h + c.y - d.y : c.y - d.y, Math.abs(c.x - d.x) > Math.abs(w + c.x - d.x) ? w + c.x - d.x : c.x - d.x) },
-		dx: function(d, c, w, h) { return (d.x + ($.isFunction(d.m) ? d.m(d, c, w, h) : d.m) * Math.cos(d.a) / (d.r * d.r) + w) % w; },
-		dy: function(d, c, w, h) { return (d.y + ($.isFunction(d.m) ? d.m(d, c, w, h) : d.m) * Math.sin(d.a) / (d.r * d.r) + h) % h; }
+		dx: function(d, c, w, h) { return (d.x + get(d.m, d, c, w, h) * Math.cos(d.a) / (d.r * d.r) + w) % w; },
+		dy: function(d, c, w, h) { return (d.y + get(d.m, d, c, w, h) * Math.sin(d.a) / (d.r * d.r) + h) % h; }
 	}
-}
+};
 physics.trajectory = {
 	a: function(d, c, w, h) { return Math.atan2(c.y + 200 * movement.y - d.y, c.x + 100 * movement.x - d.x) },
 	dx: physics.follow.dx,
 	dy: physics.follow.dy
-}
+};
 physics.gaurd = {
 	a: function(d, c, w, h) { return dist(d.sx - c.x, d.sy - c.y) <= 200 ? Math.atan2(c.y - d.y, c.x - d.x) : Math.atan2(d.sy - d.y, d.sx - d.x) },
 	dx: physics.follow.dx,
 	dy: physics.follow.dy
-}
+};
+physics.shy = {
+	a: function(d, c, w, h) { return Math.PI + physics.follow.a(d, c, w, h); },
+	dx: physics.follow.dx,
+	dy: physics.follow.dy
+};
+physics.shy2 = {
+	a: function(d, c, w, h) { var a = physics.follow.a(d, c, w, h); return Math.cos(Math.atan2(movement.y, movement.x) - a) < 0 ? Math.PI + a : a; },
+	dx: function(d, c, w, h) { return d.x + Math.cos(Math.atan2(movement.y, movement.x) - d.a) * (physics.follow.dx(d, c, w, h) - d.x); },
+	dy: function(d, c, w, h) { return d.y + Math.cos(Math.atan2(movement.y, movement.x) - d.a) * (physics.follow.dy(d, c, w, h) - d.y); }
+};
 var personalities = {
 	basic: {
 		name: 'Basic',
@@ -71,6 +81,22 @@ var personalities = {
 		momentum: 350,
 		color: 'green',
 		physics: physics.gaurd
+	},
+	shyGuy: {
+		name: 'Shy Guy',
+		bio: "Shy Guy is, well, a shy guy. He's big, but once you get to know him he's a cool dude.",
+		r: 150,
+		momentum: 35000,
+		color: 'red',
+		physics: physics.shy
+	},
+	shyGuy2: {
+		name: 'Not-So-Shy Guy',
+		bio: "This guy acts like he's shy, but he really isn't. He's just trying to sneak up on you when you're not looking...",
+		r: 40,
+		momentum: 900,
+		color: 'darkred',
+		physics: physics.shy2
 	}
 }, defaultStart = {
 	x: function(w, h) { return w / 2; },
@@ -82,9 +108,25 @@ var levels = {1: {title: 'Meet Basic', speed: 1, r: 20, personalities: {basic: 1
 		3: {title: 'Seeker', speed: 1, r: 20, personalities: {seeker: 1}},
 		4: {title: 'Gaurd', speed: 1, r: 20, personalities: {gaurd: 5, basic: 5}},
 		5: {title: 'Seeker Pack', speed: 1, r: 20, personalities: {seeker: 4}},
-		6: {title: 'Save Your Strength', speed: function(d) { return .2 + Math.max((1000 - d.dist) / 2000, 0); }, r: 20, personalities: {basic: 5}}};
+		6: {title: 'Save Your Strength', speed: function(d) { return .3 + Math.max((1000 - d.dist) / 2000, 0); }, r: 20, personalities: {basic: 5}},
+		7: {title: 'Shy Guy', speed: 1, r: 20, personalities: {shyGuy: 2, seeker: 2}},
+		8: {title: 'Not-So-Shy Guy', speed: 1, r: 20, personalities: {shyGuy2: 5}}};
 var custom = {}, current, userColor = 'lightblue', defaultInterval, scoreStorage = 'bestShapeEscape',
 		customStorage = 'customShapeEscape', movement = {x: 0, y: 0}, down = [], playing = false, buffer = 200;
+
+function get(val) {
+	if ($.isFunction(val)) {
+		if (arguments.length == 2) {
+			return val(arguments[1]);
+		} else if (arguments.length > 2) {
+			return val(Array.prototype.slice.call(arguments, 1));
+		} else {
+			return val();
+		}
+	} else {
+		return val;
+	}
+}
 
 $(document).ready(function() {
 	$('#customButtons').hide();
@@ -188,7 +230,7 @@ function init(level) {
 		d3.range(params.personalities[k]).forEach(function() {
 			var obj = personalities[k];
 			var o = Math.random()
-			var r = $.isFunction(r) ? obj.r(o) : obj.r;
+			var r = get(obj.r, o);
 			var rad = obj.r;
 			var xy = startingPosition([r, gameW - r], [r, gameH - r], [startXY.x(gameW, gameH), startXY.y(gameW, gameH)], buffer);
 			nodes.push({r: rad,
@@ -282,8 +324,8 @@ function init(level) {
 		})
 		shapes.attr("transform", function(d) { return 'translate(' + d.x + ', ' + d.y + ')'; });
 		user.each(function(d) {
-			var r = $.isFunction(d.r) ? d.r(d) : d.r;
-			var s = $.isFunction(params.speed) ? params.speed(d) : params.speed;
+			var r = get(d.r, d);
+			var s = get(params.speed, d);
 			if (d.x + movement.x * s <= gameW - r && d.x + movement.x * s >= r) {
 				var move = movement.x ? movement.x * s / dist(movement.x, movement.y) : 0;
 				d.x += move;
@@ -481,6 +523,7 @@ function initLevels(all, open, cur) {
 		if (d.open) {
 			if (defaultInterval) {
 				clearInterval(defaultInterval);
+				defaultInterval = null
 			}
 			init(d.level);
 		}
