@@ -54,6 +54,9 @@
 				<tr>
 					<td><h2 id="title"></h2>
 					<td style="text-align: right;">
+						<div style="display: inline-block;" id="customButtons">
+							<button id="delete">Delete</button>
+						</div>
 						<a href="https://twitter.com/share" class="twitter-share-button" data-lang="en" data-text="Check out Shape Escape!" data-hashtags="ShapeEscape" data-url="http://theconnman.github.io/ShapeEscape">Tweet</a>
 					</td>
 				</tr>
@@ -65,13 +68,47 @@
 	        		<td style="text-align: right;"><button onclick="window.location.href='https://theconnman.github.com'">More Games</button></td>
 	        	</tr>
 	        </table>
+	        <div id="custom">
+	        	<h1>Build Your Own Level</h1>
+	        	<table>
+	        		<tr>
+	        			<td>Title:</td>
+	        			<td><input id="buildTitle" type="text" value="Custom Level" />
+	        		</tr>
+	        		<tr>
+	        			<td>User Speed:</td>
+	        			<td>
+	        				<select id="buildSpeed">
+	        					<option value=".1">Molasses</option>
+	        					<option value=".25">Slow</option>
+	        					<option value="1" selected>Medium</option>
+	        					<option value="2">Fast</option>
+	        					<option value="5">Light Speed</option>
+	        				</select>
+	        			</td>
+	        			<td>Radius:</td>
+	        			<td>
+	        				<select id="buildSize">
+	        					<option value="5">Micro</option>
+	        					<option value="10">Small</option>
+	        					<option value="20" selected>Medium</option>
+	        					<option value="30">Large</option>
+	        					<option value="45">Extra-Large</option>
+	        				</select>
+	        			</td>
+	        		</tr>
+        		</table>
+        		<table id="buildPersonalities"></table>
+	        	<button onclick="build()">Build</button>
+	        	<button onclick="randomLevel()">Random Level (Still beta)</button>
+	        </div>
         	<div>
 	        	<div id='content'>
 			        <p>
 			        	<b>GOAL:</b> Stay alive for 10 seconds! Avoid getting touched by any of the many enemies around the map.
 			        </p>
 			        <p>
-			        	<b>HOW TO PLAY:</b> Use the arrow keys to move around the map. The game starts when you start moving, so make a play and stay alive!
+			        	<b>HOW TO PLAY:</b> Use the arrow keys to move around the map. The game starts when you start moving, so make a move and stay alive!
 			        </p>
 		        </div>
 	        </div>

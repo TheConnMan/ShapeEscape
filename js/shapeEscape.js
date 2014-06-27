@@ -118,7 +118,7 @@ var personalities = {
 	},
 	circle: {
 		name: 'Circle',
-		bio: "Circle likes his circle. He won't bother you, but don't get in his way.",
+		bio: "Circle likes his circle. He won't bother you, just don't get in his way.",
 		r: 20,
 		momentum: 900,
 		color: 'purple',
@@ -138,7 +138,8 @@ var levels = {1: {title: 'Meet Basic', speed: 1, r: 20, personalities: {basic: 1
 		7: {title: 'Shy Guy', speed: 1, r: 20, personalities: {shyGuy: 2, seeker: 2}},
 		8: {title: 'Not-So-Shy Guy', speed: 1, r: 20, personalities: {shyGuy2: 5, seeker: 1}},
 		9: {title: 'Teleporter', speed: 1, r: 20, personalities: {teleporter: 5}},
-		10: {title: 'Circle', speed: 1, r: 20, personalities: {circle: 10, seeker: 1}}};
+		10: {title: 'Circle', speed: 1, r: 20, personalities: {circle: 10, seeker: 1}},
+		11: {title: 'House Party', speed: 1, r: 20, personalities: {basic: 1, basicGhost: 1, seeker: 1, gaurd: 1, shyGuy: 1, shyGuy2: 1, teleporter: 1, circle: 1}}};
 var custom = {}, current, userColor = 'lightblue', defaultInterval, scoreStorage = 'bestShapeEscape',
 		customStorage = 'customShapeEscape', movement = {x: 0, y: 0}, down = [], playing = false, buffer = 200;
 
@@ -184,6 +185,7 @@ $(document).ready(function() {
 		}
 		if (a.length >= 10) {
 			$('#custom').show();
+			setBuild();
 		}
 	}
 	//$("#pop")[0].load();
@@ -406,11 +408,11 @@ function levelEnd(t, level) {
 		} else {
 			html += '<button class="close" onclick="init(' + level + ')">Retry Level</button>';
 		}
-		/*if (level == 9) {
+		if (level == 9) {
 			html += "<p>Congratulations, you've beaten 10 of the levels! Now you can build your own!</p>";
 			$('#custom').show();
 			html += '<button class="close" onclick="window.location.href=\'#custom\'">Build My Own</button>';
-		}*/
+		}
 		$('#modalContent').html(html);
 		if (levels[parseInt(level) + 1] || custom[parseInt(level) + 1]) {
 			newPersonalityJs(parseInt(level) + 1);
@@ -479,7 +481,7 @@ function layoutPersonalities() {
 	var keys = Object.keys(JSON.parse(window.localStorage[scoreStorage]));
 	var level = keys[keys.length - 1];
 	var avail = [];
-	for (var i = 1; i <= level; i++) {
+	for (var i = 1; i <= Math.min(level, Object.keys(levels).length); i++) {
 		avail = $.merge(avail, Object.keys(levels[i].personalities));
 	}
 	avail = $.unique(avail);
@@ -575,29 +577,24 @@ function pass(t) {
 }
 
 function build() {
-	/*var num = Object.keys(levels).length + Object.keys(custom).length + 1;
-	var t = $('#buildTitle').val(), n = parseInt($('#buildNum').val()),
-		size = parseInt($('#buildSize').val()), v = $('#buildVariance').val() * size,
-		speed = parseFloat($('#buildSpeed').val()), e = parseFloat($('#buildExpansion').val()),
-		interval = parseInt($('#buildInterval').val()), period = parseInt($('#buildPeriod').val()),
-		angle = parseInt($('#buildAngle').val());
-	if (t && n) {
-		var obj = {title: t, momentum: size * size * speed / 5, ballNum: n, expandSpeed: e, randAngleInt: interval};
-		if (period) {
-			obj.r = function(o) { return size + v * Math.cos(2 * Math.PI * (new Date() / period + o)); };
-		} else {
-			obj.avgSize = size;
-			obj.sizeVar = v;
+	var num = Object.keys(levels).length + Object.keys(custom).length + 1;
+	var t = $('#buildTitle').val(), speed = parseInt($('#buildSpeed').val()),
+		size = parseInt($('#buildSize').val());
+	var p = {};
+	$('.build').each(function() {
+		var me = $(this);
+		if (!isNaN(parseInt(me.val())) && parseInt(me.val()) != 0) {
+			p[me.attr('class').split(' ')[1]] = parseInt(me.val());
 		}
-		if (angle) {
-			obj.angle = function(o) { return Math.floor(angle * o) * 2 * Math.PI / angle; };
-		}
+	})
+	if (Object.keys(p).length != 0) {
+		var obj = {title: t, speed: speed, r: size, personalities: p};
 		custom[num] = obj;
 		window.localStorage[customStorage] = JSON.stringify(custom);
 		init(num)
 	} else {
-		var html = '<h1>Error</h1>';
-		html += '<p>Your title or number of circles was invalid.</p>';
+		var html = '<h1>Now that level would be a little too easy...</h1>';
+		html += '<p>Try selecting at least <i>one</i> enemy.</p>';
 		html += '<button class="close">My b</button>';
 		$('#modalContent').html(html);
 		$('#levelEnd').reveal({
@@ -606,7 +603,7 @@ function build() {
 		     closeonbackgroundclick: true,
 		     dismissmodalclass: 'close'
 		});
-	}*/
+	}
 }
 
 function renumberCustom() {
@@ -624,6 +621,20 @@ function renumberCustom() {
 	custom = temp;
 	window.localStorage[customStorage] = JSON.stringify(custom);
 	window.localStorage[scoreStorage] = JSON.stringify(bestTemp);
+}
+
+function setBuild() {
+	var keys = Object.keys(JSON.parse(window.localStorage[scoreStorage]));
+	var level = keys[keys.length - 1];
+	var avail = [];
+	for (var i = 1; i <= Math.min(level, Object.keys(levels).length); i++) {
+		avail = $.merge(avail, Object.keys(levels[i].personalities));
+	}
+	avail = $.unique(avail);
+	var html = avail.map(function(a) {
+		return '<tr><td>' + personalities[a].name + ':</td><td><input type="number" min="0" value="0" style="width: 40px;" class="build ' + a + '"></td></tr>';
+	})
+	$('#buildPersonalities').html(html);
 }
 
 function submit() {
