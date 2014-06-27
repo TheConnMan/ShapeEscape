@@ -45,9 +45,19 @@ physics.shy = {
 	dy: physics.follow.dy
 };
 physics.shy2 = {
-	a: function(d, c, w, h) { var a = physics.follow.a(d, c, w, h); return Math.cos(Math.atan2(movement.y, movement.x) - a) < 0 ? Math.PI + a : a; },
-	dx: function(d, c, w, h) { return d.x + Math.cos(Math.atan2(movement.y, movement.x) - d.a) * (physics.follow.dx(d, c, w, h) - d.x); },
-	dy: function(d, c, w, h) { return d.y + Math.cos(Math.atan2(movement.y, movement.x) - d.a) * (physics.follow.dy(d, c, w, h) - d.y); }
+	a: function(d, c, w, h) { var a = physics.follow.a(d, c, w, h); return Math.cos(Math.atan2(movement.y, movement.x) - a) < 0 && (movement.y != 0 || movement.x != 0) ? Math.PI + a : a; },
+	dx: function(d, c, w, h) { return d.x + Math.cos((movement.y != 0 && movement.x != 0) ? Math.atan2(movement.y, movement.x) - d.a : 0) * (physics.follow.dx(d, c, w, h) - d.x); },
+	dy: function(d, c, w, h) { return d.y + Math.cos((movement.y != 0 && movement.x != 0) ? Math.atan2(movement.y, movement.x) - d.a : 0) * (physics.follow.dy(d, c, w, h) - d.y); }
+};
+physics.teleporter = {
+	a: function(d, c, w, h) { return physics.follow.a(d, c, w, h) + Math.PI * (Math.random() - 0.5) / 2; },
+	dx: function(d, c, w, h) { return Math.random() < .0025 ? d.x + Math.cos(d.a) * 100 : d.x; },
+	dy: function(d, c, w, h) { return Math.random() < .0025 ? d.y + Math.sin(d.a) * 100 : d.y; }
+};
+physics.circle = {
+	a: function(d, c, w, h) { return 2 * Math.PI * (new Date().getTime() / 1000 + d.o) % (2 * Math.PI); },
+	dx: function(d, c, w, h) { return 100 * Math.cos(d.a) + d.sx },
+	dy: function(d, c, w, h) { return 100 * Math.sin(d.a) + d.sy; }
 };
 var personalities = {
 	basic: {
@@ -60,7 +70,7 @@ var personalities = {
 	},
 	basicGhost: {
 		name: 'Ghost',
-		bio: "Ghost is a run-of-the mill ghost. She puts in about as much effor as Basic, but doesn't care for pesky walls. She'll chase you and it it's faster to go through the wall to get you she will.",
+		bio: "Ghost is a run-of-the-mill ghost. She puts in about as much effor as Basic, but doesn't care for pesky walls. She'll chase you and it it's faster to go through the wall to get you she will.",
 		r: 20,
 		momentum: 150,
 		color: '#EEE',
@@ -97,6 +107,22 @@ var personalities = {
 		momentum: 900,
 		color: 'darkred',
 		physics: physics.shy2
+	},
+	teleporter: {
+		name: 'Teleporter',
+		bio: "Teleporter has a bit of a glitch: he can teleport, but it only works some of the time. Watch out, he could get lucky.",
+		r: 40,
+		momentum: 900,
+		color: 'steelblue',
+		physics: physics.teleporter
+	},
+	circle: {
+		name: 'Circle',
+		bio: "Circle likes his circle. He won't bother you, but don't get in his way.",
+		r: 20,
+		momentum: 900,
+		color: 'purple',
+		physics: physics.circle
 	}
 }, defaultStart = {
 	x: function(w, h) { return w / 2; },
@@ -110,7 +136,9 @@ var levels = {1: {title: 'Meet Basic', speed: 1, r: 20, personalities: {basic: 1
 		5: {title: 'Seeker Pack', speed: 1, r: 20, personalities: {seeker: 4}},
 		6: {title: 'Save Your Strength', speed: function(d) { return .3 + Math.max((1000 - d.dist) / 2000, 0); }, r: 20, personalities: {basic: 5}},
 		7: {title: 'Shy Guy', speed: 1, r: 20, personalities: {shyGuy: 2, seeker: 2}},
-		8: {title: 'Not-So-Shy Guy', speed: 1, r: 20, personalities: {shyGuy2: 5}}};
+		8: {title: 'Not-So-Shy Guy', speed: 1, r: 20, personalities: {shyGuy2: 5, seeker: 1}},
+		9: {title: 'Teleporter', speed: 1, r: 20, personalities: {teleporter: 5}},
+		10: {title: 'Circle', speed: 1, r: 20, personalities: {circle: 10, seeker: 1}}};
 var custom = {}, current, userColor = 'lightblue', defaultInterval, scoreStorage = 'bestShapeEscape',
 		customStorage = 'customShapeEscape', movement = {x: 0, y: 0}, down = [], playing = false, buffer = 200;
 
@@ -378,11 +406,11 @@ function levelEnd(t, level) {
 		} else {
 			html += '<button class="close" onclick="init(' + level + ')">Retry Level</button>';
 		}
-		if (level == 9) {
+		/*if (level == 9) {
 			html += "<p>Congratulations, you've beaten 10 of the levels! Now you can build your own!</p>";
 			$('#custom').show();
 			html += '<button class="close" onclick="window.location.href=\'#custom\'">Build My Own</button>';
-		}
+		}*/
 		$('#modalContent').html(html);
 		if (levels[parseInt(level) + 1] || custom[parseInt(level) + 1]) {
 			newPersonalityJs(parseInt(level) + 1);
