@@ -100,7 +100,17 @@
         		</table>
         		<table id="buildPersonalities"></table>
 	        	<button onclick="build()">Build</button>
-	        	<button onclick="randomLevel()">Random Level (Still beta)</button>
+	        	<br></br>
+	        	<span>Random Level Difficulty:</span>
+	        	<select id="difficulty">
+    				<option value="4">Very Easy</option>
+    				<option value="10">Easy</option>
+    				<option value="15" selected>Medium</option>
+    				<option value="25">Hard</option>
+    				<option value="35">Very Hard</option>
+    				<option value="45">Conn Approved</option>
+	        	</select>
+	        	<button onclick="randomLevel()">Random Level</button>
 	        </div>
         	<div>
 	        	<div id='content'>

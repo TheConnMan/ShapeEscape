@@ -65,6 +65,7 @@ var personalities = {
 		bio: "Basic is your average Joe. He enjoys lounging around, weekends, and chasing you. He likes a relaxing chase, but likes to clear his mind while doing so. He'll go to where you are, but can easily be decieved if you run circles around him.",
 		r: 20,
 		momentum: 150,
+		points: 1,
 		color: 'gray',
 		physics: physics.follow
 	},
@@ -73,6 +74,7 @@ var personalities = {
 		bio: "Ghost is a run-of-the-mill ghost. She puts in about as much effor as Basic, but doesn't care for pesky walls. She'll chase you and it it's faster to go through the wall to get you she will.",
 		r: 20,
 		momentum: 150,
+		points: 3,
 		color: '#EEE',
 		physics: physics.followGhost
 	},
@@ -81,6 +83,7 @@ var personalities = {
 		bio: "Seeker's gotten some intel about where you're going and moves to intercept you. Watch out: this guy's sneaky.",
 		r: 20,
 		momentum: 250,
+		points: 5,
 		color: 'blue',
 		physics: physics.trajectory
 	},
@@ -89,6 +92,7 @@ var personalities = {
 		bio: "Gaurd Dog won't bother you if you're far away, but if you get too close to him he'll chase after you. He's very protective of his space.",
 		r: 20,
 		momentum: 350,
+		points: 4,
 		color: 'green',
 		physics: physics.gaurd
 	},
@@ -97,6 +101,7 @@ var personalities = {
 		bio: "Shy Guy is, well, a shy guy. He's big, but once you get to know him he's a cool dude.",
 		r: 150,
 		momentum: 35000,
+		points: 2,
 		color: 'red',
 		physics: physics.shy
 	},
@@ -105,6 +110,7 @@ var personalities = {
 		bio: "This guy acts like he's shy, but he really isn't. He's just trying to sneak up on you when you're not looking...",
 		r: 40,
 		momentum: 900,
+		points: 3,
 		color: 'darkred',
 		physics: physics.shy2
 	},
@@ -113,6 +119,7 @@ var personalities = {
 		bio: "Teleporter has a bit of a glitch: he can teleport, but it only works some of the time. Watch out, he could get lucky.",
 		r: 40,
 		momentum: 900,
+		points: 4,
 		color: 'steelblue',
 		physics: physics.teleporter
 	},
@@ -121,6 +128,7 @@ var personalities = {
 		bio: "Circle likes his circle. He won't bother you, just don't get in his way.",
 		r: 20,
 		momentum: 900,
+		points: 3,
 		color: 'purple',
 		physics: physics.circle
 	}
@@ -604,6 +612,26 @@ function build() {
 		     dismissmodalclass: 'close'
 		});
 	}
+}
+
+function randomLevel() {
+	var num = Object.keys(levels).length + Object.keys(custom).length + 1;
+	var p = {}, points = parseInt($('#difficulty').val()), keys = Object.keys(personalities);
+	while(points > 0) {
+		var choice = keys[Math.floor(Math.random() * keys.length)];
+		if (points >= personalities[choice].points) {
+			if (p[choice]) {
+				p[choice]++;
+			} else {
+				p[choice] = 1;
+			}
+			points -= personalities[choice].points;
+		}
+	}
+	var obj = {title: 'Random Level - ' + $("#difficulty option:selected").text(), speed: 1, r: 20, personalities: p};
+	custom[num] = obj;
+	window.localStorage[customStorage] = JSON.stringify(custom);
+	init(num)
 }
 
 function renumberCustom() {
