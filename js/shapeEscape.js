@@ -36,8 +36,8 @@ physics.trajectory = {
 };
 physics.gaurd = {
 	a: function(d, c, w, h) { return dist(d.sx - c.x, d.sy - c.y) <= 200 ? Math.atan2(c.y - d.y, c.x - d.x) : Math.atan2(d.sy - d.y, d.sx - d.x) },
-	dx: physics.follow.dx,
-	dy: physics.follow.dy
+	dx: function(d, c, w, h) { return dist(d.sx - d.x, d.sy - d.y) <= 10 && dist(d.sx - c.x, d.sy - c.y) > 200 ? d.x : physics.follow.dx(d, c, w, h); },
+	dy: function(d, c, w, h) { return dist(d.sx - d.x, d.sy - d.y) <= 10 && dist(d.sx - c.x, d.sy - c.y) > 200 ? d.y : physics.follow.dy(d, c, w, h); }
 };
 physics.shy = {
 	a: function(d, c, w, h) { return Math.PI + physics.follow.a(d, c, w, h); },
@@ -58,6 +58,16 @@ physics.circle = {
 	a: function(d, c, w, h) { return 2 * Math.PI * (new Date().getTime() / 1000 + d.o) % (2 * Math.PI); },
 	dx: function(d, c, w, h) { return 100 * Math.cos(d.a) + d.sx },
 	dy: function(d, c, w, h) { return 100 * Math.sin(d.a) + d.sy; }
+};
+physics.bee = {
+	a: function(d, c, w, h) { return Math.atan2(c.y - d.y, c.x - d.x) + Math.PI / 2 * Math.cos(new Date().getTime() / 100 + 2 * d.o * Math.PI); },
+	dx: physics.follow.dx,
+	dy: physics.follow.dy
+};
+physics.strike = {
+	a: physics.gaurd.a,
+	dx: function(d, c, w, h) { var dr = dist(d.x - c.x, d.y - c.y); return dr <= 150 && dr > 75 ? d.x + 10 * Math.cos(d.a) : physics.gaurd.dx(d, c, w, h); },
+	dy: function(d, c, w, h) { var dr = dist(d.x - c.x, d.y - c.y); return dr <= 150 && dr > 75 ? d.y + 10 * Math.sin(d.a) : physics.gaurd.dy(d, c, w, h); }
 };
 var personalities = {
 	basic: {
@@ -131,6 +141,24 @@ var personalities = {
 		points: 3,
 		color: 'purple',
 		physics: physics.circle
+	},
+	bee: {
+		name: 'Bumbble Bee',
+		bio: "Buzzzz buzzzzzzzzzzzzzz.",
+		r: 20,
+		momentum: 400,
+		points: 2,
+		color: 'yellow',
+		physics: physics.bee
+	},
+	mamba: {
+		name: 'Black Mamba',
+		bio: "The Black Mamba is like the Gaurd, but moves very fast once you're within striking distance. If you see it move, run in the opposite direction.",
+		r: 10,
+		momentum: 100,
+		points: 4,
+		color: 'black',
+		physics: physics.strike
 	}
 }, defaultStart = {
 	x: function(w, h) { return w / 2; },
@@ -146,8 +174,10 @@ var levels = {1: {title: 'Meet Basic', speed: 1, r: 20, personalities: {basic: 1
 		7: {title: 'Shy Guy', speed: 1, r: 20, personalities: {shyGuy: 2, seeker: 2}},
 		8: {title: 'Not-So-Shy Guy', speed: 1, r: 20, personalities: {shyGuy2: 5, seeker: 1}},
 		9: {title: 'Teleporter', speed: 1, r: 20, personalities: {teleporter: 5}},
-		10: {title: 'Circle', speed: 1, r: 20, personalities: {circle: 10, seeker: 1}},
-		11: {title: 'House Party', speed: 1, r: 20, personalities: {basic: 1, basicGhost: 1, seeker: 1, gaurd: 1, shyGuy: 1, shyGuy2: 1, teleporter: 1, circle: 1}}};
+		10: {title: 'Circles', speed: 1, r: 20, personalities: {circle: 10, seeker: 1}},
+		11: {title: 'House Party', speed: 1, r: 20, personalities: {basic: 1, basicGhost: 1, seeker: 1, gaurd: 1, shyGuy: 1, shyGuy2: 1, teleporter: 1, circle: 1}},
+		12: {title: 'Bumbble Bees', speed: 1, r: 20, personalities: {bee: 5}},
+		13: {title: 'Black Mamba', speed: 1, r: 20, personalities: {mamba: 5, basic: 4}}};
 var custom = {}, current, userColor = 'lightblue', defaultInterval, scoreStorage = 'bestShapeEscape',
 		customStorage = 'customShapeEscape', movement = {x: 0, y: 0}, down = [], playing = false, buffer = 200;
 
