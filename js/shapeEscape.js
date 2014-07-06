@@ -171,7 +171,7 @@ var personalities = {
 		r: 10,
 		momentum: 400,
 		points: 1,
-		color: 'gray',
+		color: 'brown',
 		physics: physics.orbit
 	}
 }, defaultStart = {
@@ -704,10 +704,19 @@ function setBuild() {
 		avail = $.merge(avail, Object.keys(levels[i].personalities));
 	}
 	avail = $.unique(avail);
-	var html = avail.map(function(a) {
-		return '<tr><td>' + personalities[a].name + ':</td><td><input type="number" min="0" value="0" style="width: 40px;" class="build ' + a + '"></td></tr>';
-	})
+	var html = '';
+	for (var i = 0; i <= Math.floor(avail.length - 1) / 3; i++) {
+		html += '<tr>' + [i * 3, i * 3 + 1, i * 3 + 2].map(function(d) { return avail[d]; }).map(setBuildInput) + '</tr>';
+	}
 	$('#buildPersonalities').html(html);
+}
+
+function setBuildInput(i) {
+	if (i) {
+		return '<td>' + personalities[i].name + ':</td><td><input type="number" min="0" value="0" style="width: 40px;" class="build ' + i + '"></td>';
+	} else {
+		return '<td></td>';
+	}
 }
 
 function submit() {
@@ -718,10 +727,6 @@ function submit() {
 }
 
 function sendGmail(opts){
-    var str = 'http://mail.google.com/mail/?view=cm&fs=1'+
-	    '&to=' + opts.to +
-	    '&su=' + opts.subject +
-	    '&body=' + opts.message +
-	    '&ui=1';
+    var str = 'http://mail.google.com/mail/?view=cm&fs=1'+ '&to=' + opts.to + '&su=' + opts.subject + '&body=' + opts.message + '&ui=1';
     window.open(str, '_blank');
 }
