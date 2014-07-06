@@ -1,7 +1,7 @@
 ShapeEscape
 ===========
 
-### Play at [theconnman.github.io/ShapeEscape](https://theconnman.github.io/ShapeEscape/) ###
+### Play at [theconnman.github.io/ShapeEscape](http://theconnman.com/ShapeEscape/) ###
 
 ###GOAL:###
 Stay alive for 10 seconds! Avoid getting touched by any of the many enemies around the map.
