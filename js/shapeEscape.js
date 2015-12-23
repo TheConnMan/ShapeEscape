@@ -127,7 +127,8 @@ function init(level) {
 				sx: xy[0],
 				sy: xy[1],
 				m: obj.momentum, o: o, color: obj.color,
-				physics: obj.physics});
+				physics: $.isFunction(obj.physics) ? obj.physics() : obj.physics
+			});
 		});
 	});
 	var userNode = d3.range(1).map(function() {

@@ -159,6 +159,27 @@ physics.orbit = new Physics({
 	x: physics.gaurd.config().x,
 	y: physics.gaurd.config().y
 });
+physics.territorialCorner = new Physics({
+	a: physics.trajectory.config().a,
+	x: function(d, c, w, h) {
+		var fn = d.sx > w / 2 ? Math.max : Math.min;
+		return fn(physics.trajectory.config().x(d, c, w, h), w / 2);
+	},
+	y: function(d, c, w, h) {
+		var fn = d.sy > w / 2 ? Math.max : Math.min;
+		return fn(physics.trajectory.config().y(d, c, w, h), w / 2);
+	}
+});
+physics.territorialHalfX = new Physics({
+	a: physics.trajectory.config().a,
+	x: physics.territorialCorner.config().x,
+	y: physics.trajectory.config().y
+});
+physics.territorialHalfY = new Physics({
+	a: physics.trajectory.config().a,
+	x: physics.trajectory.config().x,
+	y: physics.territorialCorner.config().y
+});
 var personalities = {
 	basic: {
 		name: 'Basic',
@@ -267,6 +288,24 @@ var personalities = {
 		points: 1,
 		color: 'brown',
 		physics: physics.orbit
+	},
+	territorial: {
+		name: 'Territorial',
+		bio: "Territorial either stays its corner, its vertical half, or its horizontal half. Which one does each Territorial pick?",
+		r: 25,
+		momentum: 300,
+		points: 3,
+		color: '#663300',
+		physics: function() {
+			var num = Math.random();
+			if (num < 1 / 3) {
+				return physics.territorialCorner;
+			}
+			if (num < 2 / 3) {
+				return physics.territorialHalfX;
+			}
+			return physics.territorialHalfY;
+		}
 	}
 }, defaultStart = {
 	x: function(w, h) { return w / 2; },
@@ -285,6 +324,7 @@ var levels = [
 	{title: 'Not-So-Shy Guy', speed: 1, r: 20, personalities: {shyGuy2: 5, seeker: 1}},
 	{title: 'Teleporter', speed: 1, r: 20, personalities: {teleporter: 5}},
 	{title: 'Circles', speed: 1, r: 20, personalities: {circle: 10, seeker: 1}},
+	{title: 'Territorial', speed: 1, r: 20, personalities: {territorial: 9}},
 	{title: 'House Party', speed: 1, r: 20, personalities: {basic: 1, basicGhost: 1, follower: 1, seeker: 1, gaurd: 1, shyGuy: 1, shyGuy2: 1, teleporter: 1, circle: 1}},
 	{title: 'Bumbble Bees', speed: 1, r: 20, personalities: {bee: 5}},
 	{title: 'Black Mamba', speed: 1, r: 20, personalities: {mamba: 5, basic: 2}},
