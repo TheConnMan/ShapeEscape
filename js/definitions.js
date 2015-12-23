@@ -325,7 +325,7 @@ var levels = [
 	{title: 'Teleporter', speed: 1, r: 20, personalities: {teleporter: 5}},
 	{title: 'Circles', speed: 1, r: 20, personalities: {circle: 10, seeker: 1}},
 	{title: 'Territorial', speed: 1, r: 20, personalities: {territorial: 9}},
-	{title: 'House Party', speed: 1, r: 20, personalities: {basic: 1, basicGhost: 1, follower: 1, seeker: 1, gaurd: 1, shyGuy: 1, shyGuy2: 1, teleporter: 1, circle: 1}},
+	{title: 'House Party', speed: 1, r: 20, personalities: {basic: 1, basicGhost: 1, follower: 1, seeker: 1, gaurd: 1, shyGuy: 1, shyGuy2: 1, teleporter: 1, circle: 1, territorial: 1}},
 	{title: 'Bumbble Bees', speed: 1, r: 20, personalities: {bee: 5}},
 	{title: 'Black Mamba', speed: 1, r: 20, personalities: {mamba: 5, basic: 2}},
 	{title: 'That\'s no moon...', speed: 1, r: 20, personalities: {orbit: 4, seeker: 2}}
