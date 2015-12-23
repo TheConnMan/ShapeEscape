@@ -4,7 +4,7 @@
  * title - Title of the level
  * speed - Speed of the user, can be a function
  * r - Radius of the user, can be a function
- * 
+ *
  * Personalities
  * name - Name
  * bio - Short biography
@@ -12,7 +12,7 @@
  * momentum - Momentum, can be function
  * color - Shape color
  * physics - Physics object for how shape behaves
- * 
+ *
  * Physics
  * a - Function to determine trajectory angle
  * dx - Function to determine change in x on tick
@@ -24,18 +24,18 @@ var physics = {
 		dx: function(d, c, w, h) { var x = d.x + get(d.m, d, c, w, h) * Math.cos(d.a) / (d.r * d.r); return (x + d.r <= w && x >= d.r) ? x : d.x; },
 		dy: function(d, c, w, h) { var y = d.y + get(d.m, d, c, w, h) * Math.sin(d.a) / (d.r * d.r); return (y + d.r <= h && y >= d.r) ? y : d.y; }
 	}, followGhost: {
-		a: function(d, c, w, h) { return Math.atan2(Math.abs(c.y - d.y) > Math.abs(h + c.y - d.y) ? h + c.y - d.y : c.y - d.y, Math.abs(c.x - d.x) > Math.abs(w + c.x - d.x) ? w + c.x - d.x : c.x - d.x) },
+		a: function(d, c, w, h) { return Math.atan2(Math.abs(c.y - d.y) > Math.abs(h + c.y - d.y) ? h + c.y - d.y : c.y - d.y, Math.abs(c.x - d.x) > Math.abs(w + c.x - d.x) ? w + c.x - d.x : c.x - d.x); },
 		dx: function(d, c, w, h) { return (d.x + get(d.m, d, c, w, h) * Math.cos(d.a) / (d.r * d.r) + w) % w; },
 		dy: function(d, c, w, h) { return (d.y + get(d.m, d, c, w, h) * Math.sin(d.a) / (d.r * d.r) + h) % h; }
 	}
 };
 physics.trajectory = {
-	a: function(d, c, w, h) { return Math.atan2(c.y + 200 * movement.y - d.y, c.x + 100 * movement.x - d.x) },
+	a: function(d, c, w, h) { return Math.atan2(c.y + 200 * movement.y - d.y, c.x + 100 * movement.x - d.x); },
 	dx: physics.follow.dx,
 	dy: physics.follow.dy
 };
 physics.gaurd = {
-	a: function(d, c, w, h) { return dist(d.sx - c.x, d.sy - c.y) <= 200 ? Math.atan2(c.y - d.y, c.x - d.x) : Math.atan2(d.sy - d.y, d.sx - d.x) },
+	a: function(d, c, w, h) { return dist(d.sx - c.x, d.sy - c.y) <= 200 ? Math.atan2(c.y - d.y, c.x - d.x) : Math.atan2(d.sy - d.y, d.sx - d.x); },
 	dx: function(d, c, w, h) { return dist(d.sx - d.x, d.sy - d.y) <= 10 && dist(d.sx - c.x, d.sy - c.y) > 200 ? d.x : physics.follow.dx(d, c, w, h); },
 	dy: function(d, c, w, h) { return dist(d.sx - d.x, d.sy - d.y) <= 10 && dist(d.sx - c.x, d.sy - c.y) > 200 ? d.y : physics.follow.dy(d, c, w, h); }
 };
@@ -45,18 +45,18 @@ physics.shy = {
 	dy: physics.follow.dy
 };
 physics.shy2 = {
-	a: function(d, c, w, h) { var a = physics.follow.a(d, c, w, h); return Math.cos(Math.atan2(movement.y, movement.x) - a) < 0 && (movement.y != 0 || movement.x != 0) ? Math.PI + a : a; },
-	dx: function(d, c, w, h) { return d.x + Math.cos((movement.y != 0 && movement.x != 0) ? Math.atan2(movement.y, movement.x) - d.a : 0) * (physics.follow.dx(d, c, w, h) - d.x); },
-	dy: function(d, c, w, h) { return d.y + Math.cos((movement.y != 0 && movement.x != 0) ? Math.atan2(movement.y, movement.x) - d.a : 0) * (physics.follow.dy(d, c, w, h) - d.y); }
+	a: function(d, c, w, h) { var a = physics.follow.a(d, c, w, h); return Math.cos(Math.atan2(movement.y, movement.x) - a) < 0 && (movement.y !== 0 || movement.x !== 0) ? Math.PI + a : a; },
+	dx: function(d, c, w, h) { return d.x + Math.cos((movement.y !== 0 && movement.x !== 0) ? Math.atan2(movement.y, movement.x) - d.a : 0) * (physics.follow.dx(d, c, w, h) - d.x); },
+	dy: function(d, c, w, h) { return d.y + Math.cos((movement.y !== 0 && movement.x !== 0) ? Math.atan2(movement.y, movement.x) - d.a : 0) * (physics.follow.dy(d, c, w, h) - d.y); }
 };
 physics.teleporter = {
 	a: function(d, c, w, h) { return physics.follow.a(d, c, w, h) + Math.PI * (Math.random() - 0.5) / 2; },
-	dx: function(d, c, w, h) { return Math.random() < .0025 ? d.x + Math.cos(d.a) * 100 : d.x; },
-	dy: function(d, c, w, h) { return Math.random() < .0025 ? d.y + Math.sin(d.a) * 100 : d.y; }
+	dx: function(d, c, w, h) { return Math.random() < 0.0025 ? d.x + Math.cos(d.a) * 100 : d.x; },
+	dy: function(d, c, w, h) { return Math.random() < 0.0025 ? d.y + Math.sin(d.a) * 100 : d.y; }
 };
 physics.circle = {
 	a: function(d, c, w, h) { return 2 * Math.PI * (new Date().getTime() / 1000 + d.o) % (2 * Math.PI); },
-	dx: function(d, c, w, h) { return 100 * Math.cos(d.a) + d.sx },
+	dx: function(d, c, w, h) { return 100 * Math.cos(d.a) + d.sx; },
 	dy: function(d, c, w, h) { return 100 * Math.sin(d.a) + d.sy; }
 };
 physics.bee = {
@@ -70,7 +70,7 @@ physics.strike = {
 	dy: function(d, c, w, h) { var dr = dist(d.x - c.x, d.y - c.y); return dr <= 150 && dr > 75 ? d.y + 10 * Math.sin(d.a) : physics.gaurd.dy(d, c, w, h); }
 };
 physics.orbit = {
-		a: function(d, c, w, h) { return dist(d.sx - c.x, d.sy - c.y) <= 200 ? Math.atan2(c.y - d.y, c.x - d.x) + Math.PI / 2 : Math.atan2(d.sy - d.y, d.sx - d.x) },
+		a: function(d, c, w, h) { return dist(d.sx - c.x, d.sy - c.y) <= 200 ? Math.atan2(c.y - d.y, c.x - d.x) + Math.PI / 2 : Math.atan2(d.sy - d.y, d.sx - d.x); },
 		dx: physics.gaurd.dx,
 		dy: physics.gaurd.dy
 	};
@@ -184,7 +184,7 @@ var levels = {1: {title: 'Meet Basic', speed: 1, r: 20, personalities: {basic: 1
 		3: {title: 'Seeker', speed: 1, r: 20, personalities: {seeker: 1}},
 		4: {title: 'Gaurd', speed: 1, r: 20, personalities: {gaurd: 5, basic: 5}},
 		5: {title: 'Seeker Pack', speed: 1, r: 20, personalities: {seeker: 4}},
-		6: {title: 'Save Your Strength', speed: function(d) { return .3 + Math.max((1000 - d.dist) / 2000, 0); }, r: 20, personalities: {basic: 5}},
+		6: {title: 'Save Your Strength', speed: function(d) { return 0.3 + Math.max((1000 - d.dist) / 2000, 0); }, r: 20, personalities: {basic: 5}},
 		7: {title: 'Shy Guy', speed: 1, r: 20, personalities: {shyGuy: 2, seeker: 2}},
 		8: {title: 'Not-So-Shy Guy', speed: 1, r: 20, personalities: {shyGuy2: 5, seeker: 1}},
 		9: {title: 'Teleporter', speed: 1, r: 20, personalities: {teleporter: 5}},
@@ -214,12 +214,12 @@ $(document).ready(function() {
 	$('#customButtons').hide();
 	gameW = $('#game').width(), gameH = $('#game').width();
 	if (window.localStorage[customStorage]) {
-		custom = JSON.parse(window.localStorage[customStorage])
+		custom = JSON.parse(window.localStorage[customStorage]);
 	}
-	var sto = window.localStorage[scoreStorage]
+	var sto = window.localStorage[scoreStorage];
 	if (!sto || typeof(JSON.parse(sto)) != 'object' || !JSON.parse(sto)[1]) {
-		window.localStorage[scoreStorage] = JSON.stringify({1: 0})
-		init(1)
+		window.localStorage[scoreStorage] = JSON.stringify({1: 0});
+		init(1);
 		$('#modalContent').html($('#modalContent').html() + newPersonalityHtml(1) + '<button class="close">Lemme At \'Em!</button>');
 		newPersonalityJs(1);
 		$('#levelEnd').reveal({
@@ -229,7 +229,7 @@ $(document).ready(function() {
 		     dismissmodalclass: 'close'
 		});
 	} else {
-		renumberCustom()
+		renumberCustom();
 		var a = getFinishedLevels();
 		if (a.length != Object.keys(levels).length && parseInt(a[a.length - 1]) <= a.length) {
 			init(parseInt(a[a.length - 1]) + 1);
@@ -249,16 +249,16 @@ $(document).ready(function() {
 
 function init(level) {
 	playing = true;
-	
-	d3.select("#game").html('')
+
+	d3.select("#game").html('');
 
 	var svg = d3.select("#game").append("svg:svg")
 				.attr("width", gameW).attr("height", gameH).attr("id", "svg");
-	
-	var params = levels[level]
+
+	var params = levels[level];
 	if (!params) {
-		params = custom[level]
-		$('#customButtons').show()
+		params = custom[level];
+		$('#customButtons').show();
 		$('#delete').unbind('click');
 		$('#delete').click(function() {
 			delete custom[level];
@@ -266,7 +266,7 @@ function init(level) {
 				var sto = JSON.parse(window.localStorage[d]);
 				delete sto[level];
 				window.localStorage[d] = JSON.stringify(sto);
-			})
+			});
 			renumberCustom();
 			$('#customButtons').hide();
 			var a = getFinishedLevels();
@@ -275,7 +275,7 @@ function init(level) {
 			} else {
 				init(a[a.length - 1]);
 			}
-		})
+		});
 	}
 
 	$('#title').html('Level ' + level + ' - ' + params.title);
@@ -291,28 +291,28 @@ function init(level) {
 	} else {
 		startXY = defaultStart;
 	}
-	var best = JSON.parse(window.localStorage[scoreStorage])
+	var best = JSON.parse(window.localStorage[scoreStorage]);
 	if (!best[level]) {
-		best[level] = 0
-		window.localStorage[scoreStorage] = JSON.stringify(best)
+		best[level] = 0;
+		window.localStorage[scoreStorage] = JSON.stringify(best);
 	}
 	layoutPersonalities();
-	initLevels(Object.keys(levels).concat(Object.keys(custom)), Object.keys(JSON.parse(window.localStorage[scoreStorage])), level)
-	$('#best').html(best[level])
-	
+	initLevels(Object.keys(levels).concat(Object.keys(custom)), Object.keys(JSON.parse(window.localStorage[scoreStorage])), level);
+	$('#best').html(best[level]);
+
 	if (Object.keys(custom).indexOf(level.toString()) != -1) {
 		current = params;
 	} else {
 		current = null;
 	}
-	
+
 	var color = d3.scale.category10();
-	
+
 	var nodes = [];
 	Object.keys(params.personalities).forEach(function(k) {
 		d3.range(params.personalities[k]).forEach(function() {
 			var obj = personalities[k];
-			var o = Math.random()
+			var o = Math.random();
 			var r = get(obj.r, o);
 			var rad = obj.r;
 			var xy = startingPosition([r, gameW - r], [r, gameH - r], [startXY.x(gameW, gameH), startXY.y(gameW, gameH)], buffer);
@@ -323,12 +323,12 @@ function init(level) {
 				sy: xy[1],
 				m: obj.momentum, o: o, color: obj.color,
 				physics: obj.physics});
-		})
+		});
 	});
 	var userNode = d3.range(1).map(function() {
 		return {r: params.r, x: startXY.x(gameW, gameH), y: startXY.y(gameW, gameH), color: userColor, dist: 0};
 	});
-	
+
 	var shapes = svg.selectAll('.shapes')
 		.data(nodes).enter()
 		.append('circle')
@@ -336,7 +336,7 @@ function init(level) {
 		.attr('r', function(d) { return d.r; })
 		.attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
 		.attr('fill', function(d, i) { return d.color; });
-	
+
 	var user = svg.selectAll('.user')
 		.data(userNode).enter()
 		.append('circle')
@@ -344,7 +344,7 @@ function init(level) {
 		.attr('r', function(d) { return d.r; })
 		.attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
 		.attr('fill', function(d) { return d.color; });
-	
+
 	d3.select('body').on("keydown", function() {
 			switch(d3.event.keyCode) {
 			case 37:
@@ -376,11 +376,11 @@ function init(level) {
 				break;
 			}
 		});
-	
+
 	function changeMovement(x, y, key, isDown) {
 		if (!defaultInterval && isDown && playing) {
 			start = new Date().getTime();
-			defaultInterval = setInterval(redraw, 1)
+			defaultInterval = setInterval(redraw, 1);
 		}
 		if ((isDown && down.indexOf(key) == -1) || !isDown) {
 			movement.x += x;
@@ -393,7 +393,7 @@ function init(level) {
 		}
 		d3.event.preventDefault();
 	}
-			
+
 	function redraw() {
 		var cur = svg.select('.user').datum();
 		var t = Math.floor((new Date().getTime() - start) / 1000);
@@ -404,7 +404,7 @@ function init(level) {
 			if (collide(d, cur)) {
 				levelEnd(t, level);
 			}
-		})
+		});
 		shapes.attr("transform", function(d) { return 'translate(' + d.x + ', ' + d.y + ')'; });
 		user.each(function(d) {
 			var r = get(d.r, d);
@@ -450,13 +450,13 @@ function levelEnd(t, level) {
 	playing = false;
 	clearInterval(defaultInterval);
 	defaultInterval = null;
-	var best = JSON.parse(window.localStorage[scoreStorage])
+	var best = JSON.parse(window.localStorage[scoreStorage]);
 	if (pass(t)) {
 		//$("#tada")[0].play();
 		var html;
 		html = '<h1>You Completed Level ' + level + '</h1>';
 		if (levels[parseInt(level) + 1] || custom[parseInt(level) + 1]) {
-			html += newPersonalityHtml(parseInt(level) + 1)
+			html += newPersonalityHtml(parseInt(level) + 1);
 			html += '<button class="close" onclick="init(' + (parseInt(level) + 1) + ')">Next Level</button>';
 		} else {
 			html += '<button class="close" onclick="init(' + level + ')">Retry Level</button>';
@@ -476,20 +476,20 @@ function levelEnd(t, level) {
 		     closeonbackgroundclick: false,
 		     dismissmodalclass: 'close'
 		});
-	} else { 
+	} else {
 		//$("#pop")[0].play();
 		init(level);
 	}
 	if (best[level] < t) {
 		best[level] = t;
-		window.localStorage[scoreStorage] = JSON.stringify(best)
-		$('#best').html(t)
+		window.localStorage[scoreStorage] = JSON.stringify(best);
+		$('#best').html(t);
 	}
 }
 
 function newPersonalityHtml(level) {
 	var all = allNewPersonalities(level);
-	if (all.length != 0) {
+	if (all.length !== 0) {
 		return '<h2>New ' + (all.length == 1 ? 'Personality' : 'Personalities') + ' Unlocked!</h2>' + $.map(all, function(d) { return newPersonality(d, personalities[d]); }).join('');
 	} else {
 		return '';
@@ -498,29 +498,30 @@ function newPersonalityHtml(level) {
 
 function allNewPersonalities(level) {
 	var all = Object.keys(levels[level].personalities);
+	var addNew = function(d) {
+		if (all.indexOf(d) != -1) {
+			all.splice(all.indexOf(d), 1);
+		}
+	};
 	for (var i = 1; i < level; i++) {
-		Object.keys(levels[i].personalities).forEach(function(d) {
-			if (all.indexOf(d) != -1) {
-				all.splice(all.indexOf(d), 1);
-			}
-		})
+		Object.keys(levels[i].personalities).forEach(addNew);
 	}
 	return all;
 }
 
 function newPersonalityJs(level) {
 	var all = allNewPersonalities(level);
-	if (all && all.length != 0) {
+	if (all && all.length !== 0) {
 		all.forEach(function(d) {
 			var p = personalities[d];
-			drawPersonality(d, p)
+			drawPersonality(d, p);
 		});
 	}
 }
 
 function drawPersonality(d, obj) {
 	d3.select('#' + d).append('circle').attr('transform', 'translate(' + $('#' + d).width() / 2 + ',' + $('#' + d).height() / 2 + ')')
-		.attr('r', obj.r).style('fill', obj.color)
+		.attr('r', obj.r).style('fill', obj.color);
 }
 
 function newPersonality(d, obj) {
@@ -550,7 +551,7 @@ function layoutPersonalities() {
 			h: dh,
 			d: personalities[d],
 			r: dw / 2
-		}
+		};
 	});
 	var g = svg.selectAll(".icons")
 		.data(icons).enter()
@@ -574,21 +575,21 @@ function layoutPersonalities() {
 }
 
 function initLevels(all, open, cur) {
-	d3.select("#levels").html('')
-	
+	d3.select("#levels").html('');
+
 	var w = 380, perRow = 14, rw = w / perRow, pad = 2, h = rw * (1 + Math.floor(all.length / perRow));
 	var svg = d3.select("#levels").append("svg:svg")
 		.attr("width", w).attr("height", h).attr("id", "levelSvg");
-	
+
 	var nodes = d3.range(all.length).map(function(d) {
 		return { level: all[d], open: (open.indexOf(all[d]) != -1), h: rw - 2 * pad, w: rw - 2 * pad, x: (d * rw) % w + pad, y: Math.floor(d / perRow) * rw + pad };
-	})
+	});
 
 	var root = svg.selectAll(".level")
 		.data(nodes).enter()
 		.append("g")
 		.attr("width", function(d) { return d.w; })
-		.attr("height", function(d) { return d.h; })
+		.attr("height", function(d) { return d.h; });
 	var rect = root
 		.append("svg:rect")
 		.attr("class", "level")
@@ -596,32 +597,32 @@ function initLevels(all, open, cur) {
 		.attr("y", function(d) { return d.y; })
 		.attr("width", function(d) { return d.w; })
 		.attr("height", function(d) { return d.h; })
-		.style("fill", function(d) { return (d.level == cur ? 'blue' : (d.open ? 'lightblue' : 'gray')); })
+		.style("fill", function(d) { return (d.level == cur ? 'blue' : (d.open ? 'lightblue' : 'gray')); });
 	root.append('text')
 		.attr('class', 'levelText')
 		.attr("transform", function(d) { return 'translate(' + (d.x + d.w / 2) + ',' + (d.y + d.h / 2 + 6) + ')'; })
 		.text(function(d) { return d.level; });
-	
+
 	root.on('click', function(d) {
 		if (d.open) {
 			if (defaultInterval) {
 				clearInterval(defaultInterval);
-				defaultInterval = null
+				defaultInterval = null;
 			}
 			init(d.level);
 		}
-	})
+	});
 }
 
 function getFinishedLevels() {
 	var scores = JSON.parse(window.localStorage[scoreStorage]);
 	var levelKeys = Object.keys(levels);
-	var finished = []
+	var finished = [];
 	levelKeys.forEach(function(d) {
 		if (pass(scores[d])) {
-			finished.push(d)
+			finished.push(d);
 		}
-	})
+	});
 	return finished;
 }
 
@@ -636,15 +637,15 @@ function build() {
 	var p = {};
 	$('.build').each(function() {
 		var me = $(this);
-		if (!isNaN(parseInt(me.val())) && parseInt(me.val()) != 0) {
+		if (!isNaN(parseInt(me.val())) && parseInt(me.val()) !== 0) {
 			p[me.attr('class').split(' ')[1]] = parseInt(me.val());
 		}
-	})
-	if (Object.keys(p).length != 0) {
+	});
+	if (Object.keys(p).length !== 0) {
 		var obj = {title: t, speed: speed, r: size, personalities: p};
 		custom[num] = obj;
 		window.localStorage[customStorage] = JSON.stringify(custom);
-		init(num)
+		init(num);
 	} else {
 		var html = '<h1>Now that level would be a little too easy...</h1>';
 		html += '<p>Try selecting at least <i>one</i> enemy.</p>';
@@ -676,21 +677,21 @@ function randomLevel() {
 	var obj = {title: 'Random Level - ' + $("#difficulty option:selected").text(), speed: 1, r: 20, personalities: p};
 	custom[num] = obj;
 	window.localStorage[customStorage] = JSON.stringify(custom);
-	init(num)
+	init(num);
 }
 
 function renumberCustom() {
-	var levelKeys = Object.keys(levels)
-	var levelMax = levelKeys[levelKeys.length - 1]
-	var customKeys = Object.keys(custom)
-	var temp = {}
+	var levelKeys = Object.keys(levels);
+	var levelMax = levelKeys[levelKeys.length - 1];
+	var customKeys = Object.keys(custom);
+	var temp = {};
 	var best = JSON.parse(window.localStorage[scoreStorage]);
 	var bestTemp = JSON.parse(window.localStorage[scoreStorage]);
 	customKeys.forEach(function(d, i) {
-		delete bestTemp[d]
+		delete bestTemp[d];
 		bestTemp[parseInt(levelMax) + i + 1] = best[d];
 		temp[parseInt(levelMax) + i + 1] = custom[d];
-	})
+	});
 	custom = temp;
 	window.localStorage[customStorage] = JSON.stringify(custom);
 	window.localStorage[scoreStorage] = JSON.stringify(bestTemp);
@@ -705,8 +706,9 @@ function setBuild() {
 	}
 	avail = $.unique(avail);
 	var html = '';
+	var replaceAvail = function(d) { return avail[d]; };
 	for (var i = 0; i <= Math.floor(avail.length - 1) / 3; i++) {
-		html += '<tr>' + [i * 3, i * 3 + 1, i * 3 + 2].map(function(d) { return avail[d]; }).map(setBuildInput) + '</tr>';
+		html += '<tr>' + [i * 3, i * 3 + 1, i * 3 + 2].map(replaceAvail).map(setBuildInput) + '</tr>';
 	}
 	$('#buildPersonalities').html(html);
 }
@@ -721,8 +723,8 @@ function setBuildInput(i) {
 
 function submit() {
 	if (current) {
-		var m = 'Brian - Check out this new level.%0A%0A%0A%0ALeave the text below, it describes your level.%0A' + JSON.stringify(current)
-		sendGmail({to: 'brian@theconnman.com', subject: 'New Circles Level', message: m})
+		var m = 'Brian - Check out this new level.%0A%0A%0A%0ALeave the text below, it describes your level.%0A' + JSON.stringify(current);
+		sendGmail({to: 'brian@theconnman.com', subject: 'New Circles Level', message: m});
 	}
 }
 
