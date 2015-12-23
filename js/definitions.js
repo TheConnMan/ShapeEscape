@@ -34,6 +34,11 @@ physics.trajectory = {
 	dx: physics.follow.dx,
 	dy: physics.follow.dy
 };
+physics.follower = {
+	a: function(d, c, w, h) { return Math.atan2(c.y - 50 * movement.y - d.y, c.x - 50 * movement.x - d.x); },
+	dx: physics.follow.dx,
+	dy: physics.follow.dy
+};
 physics.gaurd = {
 	a: function(d, c, w, h) { return dist(d.sx - c.x, d.sy - c.y) <= 200 ? Math.atan2(c.y - d.y, c.x - d.x) : Math.atan2(d.sy - d.y, d.sx - d.x); },
 	dx: function(d, c, w, h) { return dist(d.sx - d.x, d.sy - d.y) <= 10 && dist(d.sx - c.x, d.sy - c.y) > 200 ? d.x : physics.follow.dx(d, c, w, h); },
@@ -101,6 +106,15 @@ var personalities = {
 		points: 5,
 		color: 'blue',
 		physics: physics.trajectory
+	},
+	follower: {
+		name: 'Follower',
+		bio: "Follower just wants to be with you. He'll follow you around wherever you go.",
+		r: 25,
+		momentum: 350,
+		points: 3,
+		color: '#66FF66',
+		physics: physics.follower
 	},
 	gaurd: {
 		name: 'Gaurd Dog',
@@ -182,16 +196,17 @@ var personalities = {
 var levels = {
 	1: {title: 'Meet Basic', speed: 1, r: 20, personalities: {basic: 10}},
 	2: {title: 'Ghost', speed: 1, r: 20, personalities: {basicGhost: 5, basic: 5}},
-	3: {title: 'Seeker', speed: 1, r: 20, personalities: {seeker: 1}},
-	4: {title: 'Gaurd', speed: 1, r: 20, personalities: {gaurd: 5, basic: 5}},
-	5: {title: 'Seeker Pack', speed: 1, r: 20, personalities: {seeker: 4}},
-	6: {title: 'Save Your Strength', speed: function(d) { return 0.3 + Math.max((1000 - d.dist) / 2000, 0); }, r: 20, personalities: {basic: 5}},
-	7: {title: 'Shy Guy', speed: 1, r: 20, personalities: {shyGuy: 2, seeker: 2}},
-	8: {title: 'Not-So-Shy Guy', speed: 1, r: 20, personalities: {shyGuy2: 5, seeker: 1}},
-	9: {title: 'Teleporter', speed: 1, r: 20, personalities: {teleporter: 5}},
-	10: {title: 'Circles', speed: 1, r: 20, personalities: {circle: 10, seeker: 1}},
-	11: {title: 'House Party', speed: 1, r: 20, personalities: {basic: 1, basicGhost: 1, seeker: 1, gaurd: 1, shyGuy: 1, shyGuy2: 1, teleporter: 1, circle: 1}},
-	12: {title: 'Bumbble Bees', speed: 1, r: 20, personalities: {bee: 5}},
-	13: {title: 'Black Mamba', speed: 1, r: 20, personalities: {mamba: 5, basic: 2}},
-	14: {title: 'That\'s no moon...', speed: 1, r: 20, personalities: {orbit: 4, seeker: 2}}
+	3: {title: 'Follower', speed: 1, r: 20, personalities: {follower: 3}},
+	4: {title: 'Seeker', speed: 1, r: 20, personalities: {seeker: 1}},
+	5: {title: 'Gaurd', speed: 1, r: 20, personalities: {gaurd: 5, basic: 5}},
+	6: {title: 'Seeker Pack', speed: 1, r: 20, personalities: {seeker: 4}},
+	7: {title: 'Save Your Strength', speed: function(d) { return 0.3 + Math.max((1000 - d.dist) / 2000, 0); }, r: 20, personalities: {basic: 5}},
+	8: {title: 'Shy Guy', speed: 1, r: 20, personalities: {shyGuy: 2, follower: 2, seeker: 2}},
+	9: {title: 'Not-So-Shy Guy', speed: 1, r: 20, personalities: {shyGuy2: 5, seeker: 1}},
+	10: {title: 'Teleporter', speed: 1, r: 20, personalities: {teleporter: 5}},
+	11: {title: 'Circles', speed: 1, r: 20, personalities: {circle: 10, seeker: 1}},
+	12: {title: 'House Party', speed: 1, r: 20, personalities: {basic: 1, basicGhost: 1, follower: 1, seeker: 1, gaurd: 1, shyGuy: 1, shyGuy2: 1, teleporter: 1, circle: 1}},
+	13: {title: 'Bumbble Bees', speed: 1, r: 20, personalities: {bee: 5}},
+	14: {title: 'Black Mamba', speed: 1, r: 20, personalities: {mamba: 5, basic: 2}},
+	15: {title: 'That\'s no moon...', speed: 1, r: 20, personalities: {orbit: 4, seeker: 2}}
 };
