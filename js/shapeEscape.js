@@ -223,10 +223,10 @@ $(document).ready(function() {
 		$('#modalContent').html($('#modalContent').html() + newPersonalityHtml(1) + '<button class="close">Lemme At \'Em!</button>');
 		newPersonalityJs(1);
 		$('#levelEnd').reveal({
-		     animation: 'fadeAndPop',
-		     animationspeed: 300,
-		     closeonbackgroundclick: true,
-		     dismissmodalclass: 'close'
+			animation: 'fadeAndPop',
+			animationspeed: 300,
+			closeonbackgroundclick: true,
+			dismissmodalclass: 'close'
 		});
 	} else {
 		renumberCustom();
@@ -471,10 +471,10 @@ function levelEnd(t, level) {
 			newPersonalityJs(parseInt(level) + 1);
 		}
 		$('#levelEnd').reveal({
-		     animation: 'fadeAndPop',
-		     animationspeed: 300,
-		     closeonbackgroundclick: false,
-		     dismissmodalclass: 'close'
+			animation: 'fadeAndPop',
+			animationspeed: 300,
+			closeonbackgroundclick: false,
+			dismissmodalclass: 'close'
 		});
 	} else {
 		//$("#pop")[0].play();
@@ -566,10 +566,10 @@ function layoutPersonalities() {
 			$('#modalContent').html(newPersonality(d.name, d.d) + '<a class="close-reveal-modal">&#215;</a>');
 			drawPersonality(d.name, d.d);
 			$('#levelEnd').reveal({
-			     animation: 'fadeAndPop',
-			     animationspeed: 300,
-			     closeonbackgroundclick: true,
-			     dismissmodalclass: 'close-reveal-modal'
+				animation: 'fadeAndPop',
+				animationspeed: 300,
+				closeonbackgroundclick: true,
+				dismissmodalclass: 'close-reveal-modal'
 			});
 		});
 }
@@ -652,10 +652,10 @@ function build() {
 		html += '<button class="close">My b</button>';
 		$('#modalContent').html(html);
 		$('#levelEnd').reveal({
-		     animation: 'fadeAndPop',
-		     animationspeed: 300,
-		     closeonbackgroundclick: true,
-		     dismissmodalclass: 'close'
+			animation: 'fadeAndPop',
+			animationspeed: 300,
+			closeonbackgroundclick: true,
+			dismissmodalclass: 'close'
 		});
 	}
 }
@@ -729,6 +729,6 @@ function submit() {
 }
 
 function sendGmail(opts){
-    var str = 'http://mail.google.com/mail/?view=cm&fs=1'+ '&to=' + opts.to + '&su=' + opts.subject + '&body=' + opts.message + '&ui=1';
-    window.open(str, '_blank');
+	var str = 'http://mail.google.com/mail/?view=cm&fs=1'+ '&to=' + opts.to + '&su=' + opts.subject + '&body=' + opts.message + '&ui=1';
+	window.open(str, '_blank');
 }
