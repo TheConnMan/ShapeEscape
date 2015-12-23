@@ -102,7 +102,7 @@ physics.shy = new Physics({
 });
 physics.shy2 = new Physics({
 	a: function(d, c, w, h) {
-		var a = physics.follow.a(d, c, w, h);
+		var a = physics.follow.config().a(d, c, w, h);
 		return Math.cos(Math.atan2(movement.y, movement.x) - a) < 0 && (movement.y !== 0 || movement.x !== 0) ? Math.PI + a : a;
 	},
 	x: function(d, c, w, h) {
