@@ -18,67 +18,147 @@
  * dx - Function to determine change in x on tick
  * dy - Function to determine change in y on tick
  */
-var physics = {
-	follow: {
-		a: function(d, c, w, h) { return Math.atan2(c.y - d.y, c.x - d.x); },
-		dx: function(d, c, w, h) { var x = d.x + get(d.m, d, c, w, h) * Math.cos(d.a) / (d.r * d.r); return (x + d.r <= w && x >= d.r) ? x : d.x; },
-		dy: function(d, c, w, h) { var y = d.y + get(d.m, d, c, w, h) * Math.sin(d.a) / (d.r * d.r); return (y + d.r <= h && y >= d.r) ? y : d.y; }
-	}, followGhost: {
-		a: function(d, c, w, h) { return Math.atan2(Math.abs(c.y - d.y) > Math.abs(h + c.y - d.y) ? h + c.y - d.y : c.y - d.y, Math.abs(c.x - d.x) > Math.abs(w + c.x - d.x) ? w + c.x - d.x : c.x - d.x); },
-		dx: function(d, c, w, h) { return (d.x + get(d.m, d, c, w, h) * Math.cos(d.a) / (d.r * d.r) + w) % w; },
-		dy: function(d, c, w, h) { return (d.y + get(d.m, d, c, w, h) * Math.sin(d.a) / (d.r * d.r) + h) % h; }
+
+var defaults = {
+	a: function(d, c, w, h) {
+		return Math.atan2(c.y - d.y, c.x - d.x);
+	},
+	x: function(d, c, w, h) {
+		var x = d.x + get(d.m, d, c, w, h) * Math.cos(d.a) / (d.r * d.r);
+		return (x + d.r <= w && x >= d.r) ? x : d.x;
+	},
+	y: function(d, c, w, h) {
+		var y = d.y + get(d.m, d, c, w, h) * Math.sin(d.a) / (d.r * d.r);
+		return (y + d.r <= h && y >= d.r) ? y : d.y;
 	}
 };
-physics.trajectory = {
-	a: function(d, c, w, h) { return Math.atan2(c.y + 200 * movement.y - d.y, c.x + 100 * movement.x - d.x); },
-	dx: physics.follow.dx,
-	dy: physics.follow.dy
-};
-physics.follower = {
-	a: function(d, c, w, h) { return Math.atan2(c.y - 50 * movement.y - d.y, c.x - 50 * movement.x - d.x); },
-	dx: physics.follow.dx,
-	dy: physics.follow.dy
-};
-physics.gaurd = {
-	a: function(d, c, w, h) { return dist(d.sx - c.x, d.sy - c.y) <= 200 ? Math.atan2(c.y - d.y, c.x - d.x) : Math.atan2(d.sy - d.y, d.sx - d.x); },
-	dx: function(d, c, w, h) { return dist(d.sx - d.x, d.sy - d.y) <= 10 && dist(d.sx - c.x, d.sy - c.y) > 200 ? d.x : physics.follow.dx(d, c, w, h); },
-	dy: function(d, c, w, h) { return dist(d.sx - d.x, d.sy - d.y) <= 10 && dist(d.sx - c.x, d.sy - c.y) > 200 ? d.y : physics.follow.dy(d, c, w, h); }
-};
-physics.shy = {
-	a: function(d, c, w, h) { return Math.PI + physics.follow.a(d, c, w, h); },
-	dx: physics.follow.dx,
-	dy: physics.follow.dy
-};
-physics.shy2 = {
-	a: function(d, c, w, h) { var a = physics.follow.a(d, c, w, h); return Math.cos(Math.atan2(movement.y, movement.x) - a) < 0 && (movement.y !== 0 || movement.x !== 0) ? Math.PI + a : a; },
-	dx: function(d, c, w, h) { return d.x + Math.cos((movement.y !== 0 && movement.x !== 0) ? Math.atan2(movement.y, movement.x) - d.a : 0) * (physics.follow.dx(d, c, w, h) - d.x); },
-	dy: function(d, c, w, h) { return d.y + Math.cos((movement.y !== 0 && movement.x !== 0) ? Math.atan2(movement.y, movement.x) - d.a : 0) * (physics.follow.dy(d, c, w, h) - d.y); }
-};
-physics.teleporter = {
-	a: function(d, c, w, h) { return physics.follow.a(d, c, w, h) + Math.PI * (Math.random() - 0.5) / 2; },
-	dx: function(d, c, w, h) { return Math.random() < 0.0025 ? d.x + Math.cos(d.a) * 100 : d.x; },
-	dy: function(d, c, w, h) { return Math.random() < 0.0025 ? d.y + Math.sin(d.a) * 100 : d.y; }
-};
-physics.circle = {
-	a: function(d, c, w, h) { return 2 * Math.PI * (new Date().getTime() / 1000 + d.o) % (2 * Math.PI); },
-	dx: function(d, c, w, h) { return 100 * Math.cos(d.a) + d.sx; },
-	dy: function(d, c, w, h) { return 100 * Math.sin(d.a) + d.sy; }
-};
-physics.bee = {
-	a: function(d, c, w, h) { return Math.atan2(c.y - d.y, c.x - d.x) + Math.PI / 2 * Math.cos(new Date().getTime() / 100 + 2 * d.o * Math.PI); },
-	dx: physics.follow.dx,
-	dy: physics.follow.dy
-};
-physics.strike = {
-	a: physics.gaurd.a,
-	dx: function(d, c, w, h) { var dr = dist(d.x - c.x, d.y - c.y); return dr <= 150 && dr > 75 ? d.x + 10 * Math.cos(d.a) : physics.gaurd.dx(d, c, w, h); },
-	dy: function(d, c, w, h) { var dr = dist(d.x - c.x, d.y - c.y); return dr <= 150 && dr > 75 ? d.y + 10 * Math.sin(d.a) : physics.gaurd.dy(d, c, w, h); }
-};
-physics.orbit = {
-		a: function(d, c, w, h) { return dist(d.sx - c.x, d.sy - c.y) <= 200 ? Math.atan2(c.y - d.y, c.x - d.x) + Math.PI / 2 : Math.atan2(d.sy - d.y, d.sx - d.x); },
-		dx: physics.gaurd.dx,
-		dy: physics.gaurd.dy
+
+function Physics(params) {
+	var config = params || {};
+	this.a = config.a || defaults.a;
+	this.x = config.x || defaults.x;
+	this.y = config.y || defaults.y;
+}
+
+Physics.prototype.config = function() {
+	return {
+		a: this.a,
+		x: this.x,
+		y: this.y
 	};
+};
+
+Physics.prototype.move = function(d, cur, gameW, gameH) {
+	d.a = this.a(d, cur, gameW, gameH);
+	d.x = this.x(d, cur, gameW, gameH);
+	d.y = this.y(d, cur, gameW, gameH);
+};
+
+var physics = {
+	follow: new Physics(),
+	followGhost: new Physics({
+		a: function(d, c, w, h) {
+			return Math.atan2(Math.abs(c.y - d.y) > Math.abs(h + c.y - d.y) ? h + c.y - d.y : c.y - d.y, Math.abs(c.x - d.x) > Math.abs(w + c.x - d.x) ? w + c.x - d.x : c.x - d.x);
+		},
+		x: function(d, c, w, h) {
+			return (d.x + get(d.m, d, c, w, h) * Math.cos(d.a) / (d.r * d.r) + w) % w;
+		},
+		y: function(d, c, w, h) {
+			return (d.y + get(d.m, d, c, w, h) * Math.sin(d.a) / (d.r * d.r) + h) % h;
+		}
+	})
+};
+physics.trajectory = new Physics({
+	a: function(d, c, w, h) {
+		return Math.atan2(c.y + 200 * movement.y - d.y, c.x + 100 * movement.x - d.x);
+	},
+	x: physics.follow.config().x,
+	y: physics.follow.config().y
+});
+physics.follower = new Physics({
+	a: function(d, c, w, h) {
+		return Math.atan2(c.y - 50 * movement.y - d.y, c.x - 50 * movement.x - d.x);
+	},
+	x: physics.follow.config().x,
+	y: physics.follow.config().y
+});
+physics.gaurd = new Physics({
+	a: function(d, c, w, h) {
+		return dist(d.sx - c.x, d.sy - c.y) <= 200 ? Math.atan2(c.y - d.y, c.x - d.x) : Math.atan2(d.sy - d.y, d.sx - d.x);
+	},
+	x: function(d, c, w, h) {
+		return dist(d.sx - d.x, d.sy - d.y) <= 10 && dist(d.sx - c.x, d.sy - c.y) > 200 ? d.x : physics.follow.config().x(d, c, w, h);
+	},
+	y: function(d, c, w, h) {
+		return dist(d.sx - d.x, d.sy - d.y) <= 10 && dist(d.sx - c.x, d.sy - c.y) > 200 ? d.y : physics.follow.config().y(d, c, w, h);
+	}
+});
+physics.shy = new Physics({
+	a: function(d, c, w, h) {
+		return Math.PI + physics.follow.config().a(d, c, w, h);
+	},
+	x: physics.follow.config().x,
+	y: physics.follow.config().y
+});
+physics.shy2 = new Physics({
+	a: function(d, c, w, h) {
+		var a = physics.follow.a(d, c, w, h);
+		return Math.cos(Math.atan2(movement.y, movement.x) - a) < 0 && (movement.y !== 0 || movement.x !== 0) ? Math.PI + a : a;
+	},
+	x: function(d, c, w, h) {
+		return d.x + Math.cos((movement.y !== 0 && movement.x !== 0) ? Math.atan2(movement.y, movement.x) - d.a : 0) * (physics.follow.config().x(d, c, w, h) - d.x);
+	},
+	y: function(d, c, w, h) {
+		return d.y + Math.cos((movement.y !== 0 && movement.x !== 0) ? Math.atan2(movement.y, movement.x) - d.a : 0) * (physics.follow.config().y(d, c, w, h) - d.y);
+	}
+});
+physics.teleporter = new Physics({
+	a: function(d, c, w, h) {
+		return physics.follow.config().a(d, c, w, h) + Math.PI * (Math.random() - 0.5) / 2;
+	},
+	x: function(d, c, w, h) {
+		return Math.random() < 0.0025 ? d.x + Math.cos(d.a) * 100 : d.x;
+	},
+	y: function(d, c, w, h) {
+		return Math.random() < 0.0025 ? d.y + Math.sin(d.a) * 100 : d.y;
+	}
+});
+physics.circle = new Physics({
+	a: function(d, c, w, h) {
+		return 2 * Math.PI * (new Date().getTime() / 1000 + d.o) % (2 * Math.PI);
+	},
+	x: function(d, c, w, h) {
+		return 100 * Math.cos(d.a) + d.sx;
+	},
+	y: function(d, c, w, h) {
+		return 100 * Math.sin(d.a) + d.sy;
+	}
+});
+physics.bee = new Physics({
+	a: function(d, c, w, h) {
+		return Math.atan2(c.y - d.y, c.x - d.x) + Math.PI / 2 * Math.cos(new Date().getTime() / 100 + 2 * d.o * Math.PI);
+	},
+	x: physics.follow.config().x,
+	y: physics.follow.config().y
+});
+physics.strike = new Physics({
+	a: physics.gaurd.a,
+	x: function(d, c, w, h) {
+		var dr = dist(d.x - c.x, d.y - c.y);
+		return dr <= 150 && dr > 75 ? d.x + 10 * Math.cos(d.a) : physics.gaurd.config().x(d, c, w, h);
+	},
+	y: function(d, c, w, h) {
+		var dr = dist(d.x - c.x, d.y - c.y);
+		return dr <= 150 && dr > 75 ? d.y + 10 * Math.sin(d.a) : physics.gaurd.config().y(d, c, w, h);
+	}
+});
+physics.orbit = new Physics({
+	a: function(d, c, w, h) {
+		return dist(d.sx - c.x, d.sy - c.y) <= 200 ? Math.atan2(c.y - d.y, c.x - d.x) + Math.PI / 2 : Math.atan2(d.sy - d.y, d.sx - d.x);
+	},
+	x: physics.gaurd.config().x,
+	y: physics.gaurd.config().y
+});
 var personalities = {
 	basic: {
 		name: 'Basic',

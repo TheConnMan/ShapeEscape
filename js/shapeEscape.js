@@ -203,9 +203,7 @@ function init(level) {
 		var cur = svg.select('.user').datum();
 		var t = Math.floor((new Date().getTime() - start) / 1000);
 		shapes.each(function(d) {
-			d.a = d.physics.a(d, cur, gameW, gameH);
-			d.x = d.physics.dx(d, cur, gameW, gameH);
-			d.y = d.physics.dy(d, cur, gameW, gameH);
+			d.physics.move(d, cur, gameW, gameH);
 			if (collide(d, cur)) {
 				levelEnd(t, level);
 			}
