@@ -193,20 +193,23 @@ var personalities = {
 	y: function(w, h) { return h / 2; }
 };
 
-var levels = {
-	1: {title: 'Meet Basic', speed: 1, r: 20, personalities: {basic: 10}},
-	2: {title: 'Ghost', speed: 1, r: 20, personalities: {basicGhost: 5, basic: 5}},
-	3: {title: 'Follower', speed: 1, r: 20, personalities: {follower: 3}},
-	4: {title: 'Seeker', speed: 1, r: 20, personalities: {seeker: 1}},
-	5: {title: 'Gaurd', speed: 1, r: 20, personalities: {gaurd: 5, basic: 5}},
-	6: {title: 'Seeker Pack', speed: 1, r: 20, personalities: {seeker: 4}},
-	7: {title: 'Save Your Strength', speed: function(d) { return 0.3 + Math.max((1000 - d.dist) / 2000, 0); }, r: 20, personalities: {basic: 5}},
-	8: {title: 'Shy Guy', speed: 1, r: 20, personalities: {shyGuy: 2, follower: 2, seeker: 2}},
-	9: {title: 'Not-So-Shy Guy', speed: 1, r: 20, personalities: {shyGuy2: 5, seeker: 1}},
-	10: {title: 'Teleporter', speed: 1, r: 20, personalities: {teleporter: 5}},
-	11: {title: 'Circles', speed: 1, r: 20, personalities: {circle: 10, seeker: 1}},
-	12: {title: 'House Party', speed: 1, r: 20, personalities: {basic: 1, basicGhost: 1, follower: 1, seeker: 1, gaurd: 1, shyGuy: 1, shyGuy2: 1, teleporter: 1, circle: 1}},
-	13: {title: 'Bumbble Bees', speed: 1, r: 20, personalities: {bee: 5}},
-	14: {title: 'Black Mamba', speed: 1, r: 20, personalities: {mamba: 5, basic: 2}},
-	15: {title: 'That\'s no moon...', speed: 1, r: 20, personalities: {orbit: 4, seeker: 2}}
-};
+var levels = [
+	{title: 'Meet Basic', speed: 1, r: 20, personalities: {basic: 10}},
+	{title: 'Ghost', speed: 1, r: 20, personalities: {basicGhost: 5, basic: 5}},
+	{title: 'Follower', speed: 1, r: 20, personalities: {follower: 3}},
+	{title: 'Seeker', speed: 1, r: 20, personalities: {seeker: 1}},
+	{title: 'Gaurd', speed: 1, r: 20, personalities: {gaurd: 5, basic: 5}},
+	{title: 'Seeker Pack', speed: 1, r: 20, personalities: {seeker: 4}},
+	{title: 'Save Your Strength', speed: function(d) { return 0.3 + Math.max((1000 - d.dist) / 2000, 0); }, r: 20, personalities: {basic: 5}},
+	{title: 'Shy Guy', speed: 1, r: 20, personalities: {shyGuy: 2, follower: 2, seeker: 2}},
+	{title: 'Not-So-Shy Guy', speed: 1, r: 20, personalities: {shyGuy2: 5, seeker: 1}},
+	{title: 'Teleporter', speed: 1, r: 20, personalities: {teleporter: 5}},
+	{title: 'Circles', speed: 1, r: 20, personalities: {circle: 10, seeker: 1}},
+	{title: 'House Party', speed: 1, r: 20, personalities: {basic: 1, basicGhost: 1, follower: 1, seeker: 1, gaurd: 1, shyGuy: 1, shyGuy2: 1, teleporter: 1, circle: 1}},
+	{title: 'Bumbble Bees', speed: 1, r: 20, personalities: {bee: 5}},
+	{title: 'Black Mamba', speed: 1, r: 20, personalities: {mamba: 5, basic: 2}},
+	{title: 'That\'s no moon...', speed: 1, r: 20, personalities: {orbit: 4, seeker: 2}}
+].reduce(function(all, cur, i) {
+	all[i + 1] = cur;
+	return all;
+}, {});
