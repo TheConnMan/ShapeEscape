@@ -121,18 +121,27 @@ function init(level) {
 			var r = get(obj.r, o);
 			var rad = obj.r;
 			var xy = startingPosition([r, gameW - r], [r, gameH - r], [startXY.x(gameW, gameH), startXY.y(gameW, gameH)], buffer);
-			nodes.push({r: rad,
+			nodes.push({
+				r: rad,
 				x: xy[0],
 				y: xy[1],
 				sx: xy[0],
 				sy: xy[1],
-				m: obj.momentum, o: o, color: obj.color,
+				m: obj.momentum,
+				o: o,
+				color: obj.color,
 				physics: $.isFunction(obj.physics) ? obj.physics() : obj.physics
 			});
 		});
 	});
 	var userNode = d3.range(1).map(function() {
-		return {r: params.r, x: startXY.x(gameW, gameH), y: startXY.y(gameW, gameH), color: userColor, dist: 0};
+		return {
+			r: params.r,
+			x: startXY.x(gameW, gameH),
+			y: startXY.y(gameW, gameH),
+			color: userColor,
+			dist: 0
+		};
 	});
 
 	var shapes = svg.selectAll('.shapes')

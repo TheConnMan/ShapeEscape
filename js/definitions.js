@@ -322,6 +322,17 @@ var personalities = {
 		points: 3,
 		color: '#DD44DD',
 		physics: physics.spiral
+	},
+	speedingUp: {
+		name: 'Speeding Up',
+		bio: "She takes a little while to get started. You better watch out after she does though.",
+		r: 20,
+		momentum: function() {
+			return 40 * (new Date().getTime() - start) / 1000;
+		},
+		points: 5,
+		color: '#44DD99',
+		physics: physics.trajectory
 	}
 }, defaultStart = {
 	x: function(w, h) { return w / 2; },
@@ -345,7 +356,8 @@ var levels = [
 	{title: 'Bumbble Bees', speed: 1, r: 20, personalities: {bee: 5}},
 	{title: 'Black Mamba', speed: 1, r: 20, personalities: {mamba: 5, basic: 2}},
 	{title: 'That\'s no moon...', speed: 1, r: 20, personalities: {orbit: 4, seeker: 2}},
-	{title: 'Spiral', speed: 1, r: 20, personalities: {spiral: 2, basic: 1}}
+	{title: 'Spiral', speed: 1, r: 20, personalities: {spiral: 2, basic: 1}},
+	{title: 'Speeding Up', speed: 1, r: 20, personalities: {speedingUp: 1}}
 ].reduce(function(all, cur, i) {
 	all[i + 1] = cur;
 	return all;
