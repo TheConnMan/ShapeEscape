@@ -180,6 +180,13 @@ physics.territorialHalfY = new Physics({
 	x: physics.trajectory.config().x,
 	y: physics.territorialCorner.config().y
 });
+physics.spiral = new Physics({
+	a: function(d, c, w, h) {
+		return Math.atan2(c.y - d.y, c.x - d.x) + (Math.PI - 0.15) / 2;
+	},
+	x: physics.follow.config().x,
+	y: physics.follow.config().y
+});
 var personalities = {
 	basic: {
 		name: 'Basic',
@@ -306,6 +313,15 @@ var personalities = {
 			}
 			return physics.territorialHalfY;
 		}
+	},
+	spiral: {
+		name: 'Closing In',
+		bio: "Closing In spirals towards you. Slowly but surely she'll get you. Don't let her get too close.",
+		r: 10,
+		momentum: 400,
+		points: 3,
+		color: '#DD44DD',
+		physics: physics.spiral
 	}
 }, defaultStart = {
 	x: function(w, h) { return w / 2; },
@@ -328,7 +344,8 @@ var levels = [
 	{title: 'House Party', speed: 1, r: 20, personalities: {basic: 1, basicGhost: 1, follower: 1, seeker: 1, gaurd: 1, shyGuy: 1, shyGuy2: 1, teleporter: 1, circle: 1, territorial: 1}},
 	{title: 'Bumbble Bees', speed: 1, r: 20, personalities: {bee: 5}},
 	{title: 'Black Mamba', speed: 1, r: 20, personalities: {mamba: 5, basic: 2}},
-	{title: 'That\'s no moon...', speed: 1, r: 20, personalities: {orbit: 4, seeker: 2}}
+	{title: 'That\'s no moon...', speed: 1, r: 20, personalities: {orbit: 4, seeker: 2}},
+	{title: 'Spiral', speed: 1, r: 20, personalities: {spiral: 2, basic: 1}}
 ].reduce(function(all, cur, i) {
 	all[i + 1] = cur;
 	return all;
